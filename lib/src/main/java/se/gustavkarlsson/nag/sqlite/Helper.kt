@@ -13,6 +13,7 @@ internal class Helper(
 	databaseName: String? = Database.NAME,
 	databaseVersion: Int = Database.VERSION,
 	private val table: String = Table.NAME,
+	private val orderColumn: String = Table.COLUMN_TIMESTAMP,
 	private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT),
 	private val toContentValues: Map<String, Any?>.() -> ContentValues = Map<String, Any?>::toContentValues
 ) : SQLiteOpenHelper(
@@ -73,6 +74,12 @@ internal class Helper(
 	fun deleteDatabase() {
 		SQLiteDatabase.deleteDatabase(File(databaseName))
 	}
+
+	private fun Order.toSql(): String =
+		when (this) {
+			Order.OldestFirst -> "$orderColumn ASC"
+			Order.NewestFirst -> "$orderColumn DESC"
+		}
 }
 
 private fun List<Selection>.toSelectionSql() =
@@ -80,12 +87,6 @@ private fun List<Selection>.toSelectionSql() =
 
 private fun List<Selection>.toSelectionArgSql() =
 	map(Selection::selectionArgSql).toTypedArray()
-
-private fun Order.toSql(): String =
-	when (this) {
-		Order.OldestFirst -> "${Table.COLUMN_TIMESTAMP} ASC"
-		Order.NewestFirst -> "${Table.COLUMN_TIMESTAMP} DESC"
-	}
 
 internal data class Selection(
 	private val column: String,
