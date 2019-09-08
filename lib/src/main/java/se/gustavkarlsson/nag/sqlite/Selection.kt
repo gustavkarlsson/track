@@ -5,13 +5,16 @@ import se.gustavkarlsson.nag.Filter
 internal data class Selection(
 	private val column: String,
 	private val operator: Operator,
-	private val value: Any
+	private val value: Any?
 ) {
 	val selectionSql: String
 		get() = "$column ${operator.sql} ?"
 
 	val selectionArgSql: String
-		get() = value.toString()
+		get() = when (value) {
+			is Boolean -> if (value) "1" else "0"
+			else -> value.toString()
+		}
 }
 
 internal enum class Operator(val sql: String) {

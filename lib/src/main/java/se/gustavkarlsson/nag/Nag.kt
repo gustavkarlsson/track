@@ -2,7 +2,7 @@ package se.gustavkarlsson.nag
 
 import android.content.Context
 import android.os.Build
-import se.gustavkarlsson.nag.sqlite.Helper
+import se.gustavkarlsson.nag.sqlite.Sqlite
 import se.gustavkarlsson.nag.sqlite.SqliteNag
 
 interface Nag {
@@ -15,9 +15,9 @@ interface Nag {
 	): CloseableSequence<Record>
 
 	fun add(key: String, value: String = "")
-	fun remove(id: Long)
-	fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit = {})
-	fun deleteDatabase()
+	fun remove(id: Long): Boolean
+	fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit = {}): Int
+	fun deleteDatabase(): Boolean
 
 	companion object : Nag {
 		private var initializedDelegate: Nag? = null
@@ -27,7 +27,7 @@ interface Nag {
 			}
 
 		fun initialize(context: Context) {
-			initializedDelegate = SqliteNag(Helper(context), context.appVersion)
+			initializedDelegate = SqliteNag(Sqlite(context), context.appVersion)
 		}
 
 		private val Context.appVersion: Long

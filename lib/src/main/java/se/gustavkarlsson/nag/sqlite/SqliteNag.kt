@@ -4,7 +4,7 @@ import android.database.Cursor
 import se.gustavkarlsson.nag.*
 
 internal class SqliteNag(
-	private val helper: Helper,
+	private val sqlite: Sqlite,
 	private val appVersion: Long,
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
 	private val tryGetRecordAndClose: Cursor.() -> Record? =
@@ -14,14 +14,14 @@ internal class SqliteNag(
 	override fun getSingle(key: String): Record? {
 		val selections =
 			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
-		val cursor = helper.query(selections, limit = 1)
+		val cursor = sqlite.query(selections, limit = 1)
 		return cursor.tryGetRecordAndClose()
 	}
 
 	override fun setSingle(key: String, value: String) {
 		val selections =
 			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
-		helper.upsert(selections, createRow(key, value, true))
+		sqlite.upsert(selections, createRow(key, value, true))
 	}
 
 	override fun query(
@@ -34,12 +34,12 @@ internal class SqliteNag(
 			Order.OldestFirst -> OrderBy.Ascending(Table.COLUMN_TIMESTAMP)
 			Order.NewestFirst -> OrderBy.Descending(Table.COLUMN_TIMESTAMP)
 		}
-		val cursor = helper.query(selections, orderBy)
+		val cursor = sqlite.query(selections, orderBy)
 		return CloseableRecordCursorSequence(cursor)
 	}
 
 	override fun add(key: String, value: String) {
-		helper.insert(createRow(key, value, false))
+		sqlite.insert(createRow(key, value, false))
 	}
 
 	private fun createRow(key: String, value: String, singleton: Boolean): Map<String, Any> =
@@ -51,16 +51,17 @@ internal class SqliteNag(
 			Table.COLUMN_VALUE to value
 		)
 
-	override fun remove(id: Long) {
-		helper.delete(listOf(Selection(Table.COLUMN_ID, Operator.Equals, id)))
+	override fun remove(id: Long): Boolean {
+		val selections = listOf(Selection(Table.COLUMN_ID, Operator.Equals, id))
+		return sqlite.delete(selections) > 0
 	}
 
-	override fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit) {
+	override fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit): Int {
 		val selections = createKeySelection(key) + filtersConfigBlock.toSelections()
-		helper.delete(selections)
+		return sqlite.delete(selections)
 	}
 
-	override fun deleteDatabase() = helper.deleteDatabase()
+	override fun deleteDatabase() = sqlite.deleteDatabase()
 
 	private fun createKeySelection(key: String) =
 		listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))

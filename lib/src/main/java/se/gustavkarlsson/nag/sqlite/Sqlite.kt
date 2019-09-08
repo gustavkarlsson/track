@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.io.File
 
-internal class Helper(
+internal class Sqlite(
 	context: Context,
 	databaseName: String? = Database.NAME,
 	databaseVersion: Int = Database.VERSION,
@@ -65,17 +65,16 @@ internal class Helper(
 		}
 	}
 
-	fun delete(selections: List<Selection>) {
+	fun delete(selections: List<Selection>): Int =
 		writableDatabase.delete(
 			table,
 			selections.toSelectionSql(),
 			selections.toSelectionArgSql()
 		)
-	}
 
-	fun deleteDatabase() {
+	fun deleteDatabase(): Boolean {
 		val file = File(readableDatabase.path)
 		close()
-		SQLiteDatabase.deleteDatabase(file)
+		return SQLiteDatabase.deleteDatabase(file)
 	}
 }
