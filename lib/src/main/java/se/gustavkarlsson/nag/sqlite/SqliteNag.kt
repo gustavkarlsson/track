@@ -5,22 +5,22 @@ import se.gustavkarlsson.nag.*
 
 internal class SqliteNag(
 	private val helper: Helper,
+	private val appVersion: Long,
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
-	private val appVersion: Int = BuildConfig.VERSION_CODE,
 	private val tryGetRecordAndClose: Cursor.() -> Record? =
 		{ tryGetRecordAndClose(Cursor::readExistingRecord) },
 	private val toSelection: Filter.() -> Selection = Filter::toSelection
 ) : Nag {
 	override fun getSingle(key: String): Record? {
 		val selections =
-			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, 1)
+			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
 		val cursor = helper.query(selections, limit = 1)
 		return cursor.tryGetRecordAndClose()
 	}
 
 	override fun setSingle(key: String, value: String) {
 		val selections =
-			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, 1)
+			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
 		helper.upsert(selections, createRow(key, value, true))
 	}
 
@@ -44,7 +44,7 @@ internal class SqliteNag(
 
 	private fun createRow(key: String, value: String, singleton: Boolean): Map<String, Any> =
 		mapOf(
-			Table.COLUMN_SINGLETON to if (singleton) 1 else 0,
+			Table.COLUMN_SINGLETON to singleton,
 			Table.COLUMN_KEY to key,
 			Table.COLUMN_TIMESTAMP to getTimestamp(),
 			Table.COLUMN_APP_VERSION to appVersion,
@@ -60,7 +60,7 @@ internal class SqliteNag(
 		helper.delete(selections)
 	}
 
-	override fun clearDatabase() = helper.deleteDatabase()
+	override fun deleteDatabase() = helper.deleteDatabase()
 
 	private fun createKeySelection(key: String) =
 		listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))

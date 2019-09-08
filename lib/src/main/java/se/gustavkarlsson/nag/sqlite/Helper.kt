@@ -74,6 +74,8 @@ internal class Helper(
 	}
 
 	fun deleteDatabase() {
-		SQLiteDatabase.deleteDatabase(File(databaseName))
+		val file = File(readableDatabase.path)
+		close()
+		SQLiteDatabase.deleteDatabase(file)
 	}
 }

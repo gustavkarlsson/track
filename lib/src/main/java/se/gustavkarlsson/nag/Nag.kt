@@ -1,6 +1,7 @@
 package se.gustavkarlsson.nag
 
 import android.content.Context
+import android.os.Build
 import se.gustavkarlsson.nag.sqlite.Helper
 import se.gustavkarlsson.nag.sqlite.SqliteNag
 
@@ -16,7 +17,7 @@ interface Nag {
 	fun add(key: String, value: String = "")
 	fun remove(id: Long)
 	fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit = {})
-	fun clearDatabase()
+	fun deleteDatabase()
 
 	companion object : Nag {
 		private var initializedDelegate: Nag? = null
@@ -26,8 +27,19 @@ interface Nag {
 			}
 
 		fun initialize(context: Context) {
-			initializedDelegate = SqliteNag(Helper(context))
+			initializedDelegate = SqliteNag(Helper(context), context.appVersion)
 		}
+
+		private val Context.appVersion: Long
+			get() {
+				val packageInfo = packageManager.getPackageInfo(packageName, 0)
+				return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+					packageInfo.longVersionCode
+				} else {
+					@Suppress("DEPRECATION")
+					packageInfo.versionCode.toLong()
+				}
+			}
 
 		override fun getSingle(key: String) =
 			delegate.getSingle(key)
@@ -50,7 +62,7 @@ interface Nag {
 		override fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit) =
 			delegate.remove(key, filtersConfigBlock)
 
-		override fun clearDatabase() =
-			delegate.clearDatabase()
+		override fun deleteDatabase() =
+			delegate.deleteDatabase()
 	}
 }

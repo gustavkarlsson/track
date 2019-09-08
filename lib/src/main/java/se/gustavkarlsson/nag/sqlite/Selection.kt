@@ -60,7 +60,7 @@ internal fun Filter.toSelection() =
 			version
 		)
 		is Filter.ValueIs -> Selection(
-			Table.COLUMN_APP_VERSION,
+			Table.COLUMN_VALUE,
 			Operator.Equals,
 			value
 		)
