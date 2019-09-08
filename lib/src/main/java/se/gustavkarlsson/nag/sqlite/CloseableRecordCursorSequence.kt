@@ -12,9 +12,9 @@ internal class CloseableRecordCursorSequence(
 		cursor.use { cursor ->
 			var hasData = cursor.hasData
 			while (hasData) {
-				val entity = cursor.readExistingRecord()
+				val record = cursor.readExistingRecord()
 				hasData = cursor.hasData
-				yield(entity)
+				yield(record)
 			}
 		}
 	}
