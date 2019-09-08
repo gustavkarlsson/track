@@ -11,14 +11,14 @@ internal class SqliteNag(
 		{ tryGetRecordAndClose(Cursor::readExistingRecord) },
 	private val toSelection: Filter.() -> Selection = Filter::toSelection
 ) : Nag {
-	override fun getSingle(key: String): Record? {
+	override fun get(key: String): Record? {
 		val selections =
 			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
 		val cursor = sqlite.query(selections, limit = 1)
 		return cursor.tryGetRecordAndClose()
 	}
 
-	override fun setSingle(key: String, value: String) {
+	override fun set(key: String, value: String) {
 		val selections =
 			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
 		sqlite.upsert(selections, createRow(key, value, true))
