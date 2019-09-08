@@ -31,8 +31,8 @@ internal class SqliteNag(
 	): CloseableSequence<Record> {
 		val selections = createKeySelection(key) + filtersConfigBlock.toSelections()
 		val orderBy = when (order) {
-			Order.OldestFirst -> OrderBy.Ascending(Table.COLUMN_TIMESTAMP)
-			Order.NewestFirst -> OrderBy.Descending(Table.COLUMN_TIMESTAMP)
+			Order.Ascending -> OrderBy.Ascending(Table.COLUMN_ID)
+			Order.Descending -> OrderBy.Descending(Table.COLUMN_ID)
 		}
 		val cursor = sqlite.query(selections, orderBy)
 		return CloseableRecordCursorSequence(cursor)

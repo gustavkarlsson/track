@@ -10,7 +10,7 @@ interface Nag {
 	fun set(key: String, value: String = "")
 	fun query(
 		key: String,
-		order: Order = Order.OldestFirst,
+		order: Order = Order.Ascending,
 		filtersConfigBlock: FiltersConfig.() -> Unit = {}
 	): CloseableSequence<Record>
 
