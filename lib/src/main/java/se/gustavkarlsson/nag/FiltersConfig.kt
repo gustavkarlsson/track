@@ -10,6 +10,7 @@ class FiltersConfig internal constructor() {
 	fun versionLessThan(version: Long) = filters.add(Filter.VersionLessThan(version))
 	fun versionGreaterThan(version: Long) = filters.add(Filter.VersionGreaterThan(version))
 	fun valueIs(value: String) = filters.add(Filter.ValueIs(value))
+	fun valueIsNot(value: String) = filters.add(Filter.ValueIsNot(value))
 }
 
 internal sealed class Filter {
