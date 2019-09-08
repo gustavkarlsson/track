@@ -1,5 +1,7 @@
 package se.gustavkarlsson.nag.sqlite
 
+import se.gustavkarlsson.nag.Filter
+
 internal data class Selection(
 	private val column: String,
 	private val operator: Operator,
@@ -24,3 +26,42 @@ internal fun List<Selection>.toSelectionSql(): String =
 
 internal fun List<Selection>.toSelectionArgSql(): Array<String> =
 	map(Selection::selectionArgSql).toTypedArray()
+
+internal fun Filter.toSelection() =
+	when (this) {
+		is Filter.Before -> Selection(
+			Table.COLUMN_TIMESTAMP,
+			Operator.LessThan,
+			timestamp
+		)
+		is Filter.After -> Selection(
+			Table.COLUMN_TIMESTAMP,
+			Operator.GreaterThan,
+			timestamp
+		)
+		is Filter.VersionIs -> Selection(
+			Table.COLUMN_APP_VERSION,
+			Operator.Equals,
+			version
+		)
+		is Filter.VersionIsNot -> Selection(
+			Table.COLUMN_APP_VERSION,
+			Operator.NotEquals,
+			version
+		)
+		is Filter.VersionLessThan -> Selection(
+			Table.COLUMN_APP_VERSION,
+			Operator.LessThan,
+			version
+		)
+		is Filter.VersionGreaterThan -> Selection(
+			Table.COLUMN_APP_VERSION,
+			Operator.GreaterThan,
+			version
+		)
+		is Filter.ValueIs -> Selection(
+			Table.COLUMN_APP_VERSION,
+			Operator.Equals,
+			value
+		)
+	}

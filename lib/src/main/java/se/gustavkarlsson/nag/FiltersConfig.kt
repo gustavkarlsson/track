@@ -1,6 +1,6 @@
 package se.gustavkarlsson.nag
 
-class Filters internal constructor() {
+class FiltersConfig internal constructor() {
 	internal val filters: MutableList<Filter> = mutableListOf()
 
 	fun before(timestamp: Long) = filters.add(Filter.Before(timestamp))

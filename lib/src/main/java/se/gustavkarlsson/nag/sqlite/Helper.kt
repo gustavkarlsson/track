@@ -14,8 +14,10 @@ internal class Helper(
 	private val table: String = Table.NAME,
 	private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT),
 	private val toSelectionSql: List<Selection>.() -> String = List<Selection>::toSelectionSql,
-	private val toSelectionArgSql: List<Selection>.() -> Array<String> = List<Selection>::toSelectionArgSql,
-	private val toContentValues: Map<String, Any?>.() -> ContentValues = Map<String, Any?>::toContentValues
+	private val toSelectionArgSql: List<Selection>.() -> Array<String> =
+		List<Selection>::toSelectionArgSql,
+	private val toContentValues: Map<String, Any?>.() -> ContentValues =
+		Map<String, Any?>::toContentValues
 ) : SQLiteOpenHelper(
 	context,
 	databaseName,

@@ -7,33 +7,29 @@ internal class SqliteNag(
 	private val helper: Helper,
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
 	private val appVersion: Int = BuildConfig.VERSION_CODE,
-	private val tryGetRecordAndClose: Cursor.() -> Record? = { tryGetRecordAndClose(Cursor::readExistingRecord) }
+	private val tryGetRecordAndClose: Cursor.() -> Record? =
+		{ tryGetRecordAndClose(Cursor::readExistingRecord) },
+	private val toSelection: Filter.() -> Selection = Filter::toSelection
 ) : Nag {
 	override fun getSingle(key: String): Record? {
-		val selections = listOf(
-			Selection(Table.COLUMN_KEY, Operator.Equals, key),
-			Selection(Table.COLUMN_SINGLETON, Operator.Equals, 1)
-		)
+		val selections =
+			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, 1)
 		val cursor = helper.query(selections, limit = 1)
 		return cursor.tryGetRecordAndClose()
 	}
 
 	override fun setSingle(key: String, value: String) {
-		val selections = listOf(
-			Selection(Table.COLUMN_KEY, Operator.Equals, key),
-			Selection(Table.COLUMN_SINGLETON, Operator.Equals, 1)
-		)
+		val selections =
+			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, 1)
 		helper.upsert(selections, createRow(key, value, true))
 	}
 
 	override fun query(
 		key: String,
 		order: Order,
-		filters: Filters.() -> Unit
+		filtersConfigBlock: FiltersConfig.() -> Unit
 	): CloseableSequence<Record> {
-		val keySelection = listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
-		val filterSelections = createFilterSelections(filters)
-		val selections = keySelection + filterSelections
+		val selections = createKeySelection(key) + filtersConfigBlock.toSelections()
 		val orderBy = when (order) {
 			Order.OldestFirst -> OrderBy.Ascending(Table.COLUMN_TIMESTAMP)
 			Order.NewestFirst -> OrderBy.Descending(Table.COLUMN_TIMESTAMP)
@@ -59,54 +55,16 @@ internal class SqliteNag(
 		helper.delete(listOf(Selection(Table.COLUMN_ID, Operator.Equals, id)))
 	}
 
-	override fun remove(key: String, filters: Filters.() -> Unit) {
-		val keySelection = listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
-		val filterSelections = createFilterSelections(filters)
-		val selections = keySelection + filterSelections
+	override fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit) {
+		val selections = createKeySelection(key) + filtersConfigBlock.toSelections()
 		helper.delete(selections)
 	}
 
 	override fun clearDatabase() = helper.deleteDatabase()
+
+	private fun createKeySelection(key: String) =
+		listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
+
+	private fun (FiltersConfig.() -> Unit).toSelections(): List<Selection> =
+		FiltersConfig().apply(this).filters.map(toSelection)
 }
-
-private fun createFilterSelections(filters: Filters.() -> Unit): List<Selection> =
-	Filters().apply(filters).filters.map(Filter::toSelection)
-
-private fun Filter.toSelection() =
-	when (this) {
-		is Filter.Before -> Selection(
-			Table.COLUMN_TIMESTAMP,
-			Operator.LessThan,
-			timestamp
-		)
-		is Filter.After -> Selection(
-			Table.COLUMN_TIMESTAMP,
-			Operator.GreaterThan,
-			timestamp
-		)
-		is Filter.VersionIs -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.Equals,
-			version
-		)
-		is Filter.VersionIsNot -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.NotEquals,
-			version
-		)
-		is Filter.VersionLessThan -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.LessThan,
-			version
-		)
-		is Filter.VersionGreaterThan -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.GreaterThan,
-			version
-		)
-		is Filter.ValueIs -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.Equals,
-			value
-		)
-	}
