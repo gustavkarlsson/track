@@ -20,4 +20,5 @@ internal sealed class Filter {
 	data class VersionLessThan(val version: Long) : Filter()
 	data class VersionGreaterThan(val version: Long) : Filter()
 	data class ValueIs(val value: String) : Filter()
+	data class ValueIsNot(val value: String) : Filter()
 }

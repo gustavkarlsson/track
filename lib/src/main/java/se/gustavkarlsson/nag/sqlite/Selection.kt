@@ -64,4 +64,9 @@ internal fun Filter.toSelection() =
 			Operator.Equals,
 			value
 		)
+		is Filter.ValueIsNot -> Selection(
+			Table.COLUMN_VALUE,
+			Operator.NotEquals,
+			value
+		)
 	}
