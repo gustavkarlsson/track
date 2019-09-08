@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag.app
+package se.gustavkarlsson.nag.demo
 
 import android.os.Bundle
 import android.widget.Toast

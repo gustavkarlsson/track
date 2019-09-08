@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "se.gustavkarlsson.nag.example"
+        applicationId = "se.gustavkarlsson.nag.demo"
         minSdkVersion(versions.minSdk)
         targetSdkVersion(versions.targetSdk)
         versionCode = 1

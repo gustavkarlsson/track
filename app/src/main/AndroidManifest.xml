@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
-	package="se.gustavkarlsson.nag.app">
+	package="se.gustavkarlsson.nag.demo">
 
 	<application
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
 		android:theme="@style/AppTheme"
 		tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-		<activity android:name="se.gustavkarlsson.nag.app.MainActivity">
+		<activity android:name=".MainActivity">
 			<intent-filter android:label="@string/app_name">
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
