@@ -7,6 +7,6 @@ internal fun Cursor.readExistingRecord(): Record = Record(
 	id = getLong(getColumnIndex(Table.COLUMN_ID)),
 	key = getString(getColumnIndex(Table.COLUMN_KEY)),
 	timestamp = getLong(getColumnIndex(Table.COLUMN_TIMESTAMP)),
-	appVersion = getInt(getColumnIndex(Table.COLUMN_APP_VERSION)),
+	appVersion = getLong(getColumnIndex(Table.COLUMN_APP_VERSION)),
 	value = getString(getColumnIndex(Table.COLUMN_VALUE))
 )
