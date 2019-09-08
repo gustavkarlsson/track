@@ -1,16 +1,18 @@
 package se.gustavkarlsson.nag
 
 class FiltersConfig internal constructor() {
-	internal val filters: MutableList<Filter> = mutableListOf()
+	private val internalFilters = mutableListOf<Filter>()
+	internal val filters: List<Filter>
+		get() = internalFilters.toList()
 
-	fun before(timestamp: Long) = filters.add(Filter.Before(timestamp))
-	fun after(timestamp: Long) = filters.add(Filter.After(timestamp))
-	fun versionIs(version: Long) = filters.add(Filter.VersionIs(version))
-	fun versionIsNot(version: Long) = filters.add(Filter.VersionIsNot(version))
-	fun versionLessThan(version: Long) = filters.add(Filter.VersionLessThan(version))
-	fun versionGreaterThan(version: Long) = filters.add(Filter.VersionGreaterThan(version))
-	fun valueIs(value: String) = filters.add(Filter.ValueIs(value))
-	fun valueIsNot(value: String) = filters.add(Filter.ValueIsNot(value))
+	fun before(timestamp: Long) = internalFilters.add(Filter.Before(timestamp))
+	fun after(timestamp: Long) = internalFilters.add(Filter.After(timestamp))
+	fun versionIs(version: Long) = internalFilters.add(Filter.VersionIs(version))
+	fun versionIsNot(version: Long) = internalFilters.add(Filter.VersionIsNot(version))
+	fun versionLessThan(version: Long) = internalFilters.add(Filter.VersionLessThan(version))
+	fun versionGreaterThan(version: Long) = internalFilters.add(Filter.VersionGreaterThan(version))
+	fun valueIs(value: String) = internalFilters.add(Filter.ValueIs(value))
+	fun valueIsNot(value: String) = internalFilters.add(Filter.ValueIsNot(value))
 }
 
 internal sealed class Filter {
