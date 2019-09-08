@@ -5,7 +5,6 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import se.gustavkarlsson.nag.Order
 import java.io.File
 
 internal class Helper(
@@ -13,8 +12,9 @@ internal class Helper(
 	databaseName: String? = Database.NAME,
 	databaseVersion: Int = Database.VERSION,
 	private val table: String = Table.NAME,
-	private val orderColumn: String = Table.COLUMN_TIMESTAMP,
 	private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT),
+	private val toSelectionSql: List<Selection>.() -> String = List<Selection>::toSelectionSql,
+	private val toSelectionArgSql: List<Selection>.() -> Array<String> = List<Selection>::toSelectionArgSql,
 	private val toContentValues: Map<String, Any?>.() -> ContentValues = Map<String, Any?>::toContentValues
 ) : SQLiteOpenHelper(
 	context,
@@ -30,7 +30,7 @@ internal class Helper(
 		error("DB upgrade not configured from version $oldVersion-$newVersion")
 	}
 
-	fun query(selections: List<Selection>, order: Order? = null, limit: Int? = null): Cursor =
+	fun query(selections: List<Selection>, orderBy: OrderBy? = null, limit: Int? = null): Cursor =
 		readableDatabase.query(
 			table,
 			null,
@@ -38,7 +38,7 @@ internal class Helper(
 			selections.toSelectionArgSql(),
 			null,
 			null,
-			order?.toSql(),
+			orderBy?.sql,
 			limit?.let(Int::toString)
 		)
 
@@ -47,7 +47,7 @@ internal class Helper(
 	}
 
 	fun upsert(selections: List<Selection>, row: Map<String, Any>) {
-		writableDatabase.run {
+		with(writableDatabase) {
 			beginTransaction()
 			try {
 				delete(
@@ -74,35 +74,4 @@ internal class Helper(
 	fun deleteDatabase() {
 		SQLiteDatabase.deleteDatabase(File(databaseName))
 	}
-
-	private fun Order.toSql(): String =
-		when (this) {
-			Order.OldestFirst -> "$orderColumn ASC"
-			Order.NewestFirst -> "$orderColumn DESC"
-		}
-}
-
-private fun List<Selection>.toSelectionSql() =
-	map(Selection::selectionSql).joinToString(" AND ")
-
-private fun List<Selection>.toSelectionArgSql() =
-	map(Selection::selectionArgSql).toTypedArray()
-
-internal data class Selection(
-	private val column: String,
-	private val operator: Operator,
-	private val value: Any
-) {
-	val selectionSql: String
-		get() = "$column ${operator.sql} ?"
-
-	val selectionArgSql: String
-		get() = value.toString()
-}
-
-internal enum class Operator(val sql: String) {
-	LessThan("<"),
-	GreaterThan(">"),
-	Equals("="),
-	NotEquals("<>")
 }

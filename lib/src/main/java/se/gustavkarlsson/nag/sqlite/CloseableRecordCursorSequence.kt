@@ -6,13 +6,13 @@ import se.gustavkarlsson.nag.Record
 
 internal class CloseableRecordCursorSequence(
 	private val cursor: Cursor,
-	private val readRecord: Cursor.() -> Record = Cursor::readExistingRecord
+	private val readExistingRecord: Cursor.() -> Record = Cursor::readExistingRecord
 ) : CloseableSequence<Record> {
 	private val sequence: Sequence<Record> = sequence {
 		cursor.use { cursor ->
 			var hasData = cursor.hasData
 			while (hasData) {
-				val entity = cursor.readRecord()
+				val entity = cursor.readExistingRecord()
 				hasData = cursor.hasData
 				yield(entity)
 			}

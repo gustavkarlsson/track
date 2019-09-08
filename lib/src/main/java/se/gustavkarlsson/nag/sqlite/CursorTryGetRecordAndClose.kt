@@ -4,11 +4,11 @@ import android.database.Cursor
 import se.gustavkarlsson.nag.Record
 
 internal fun Cursor.tryGetRecordAndClose(
-	readRecord: Cursor.() -> Record = Cursor::readExistingRecord
+	readExistingRecord: Cursor.() -> Record = Cursor::readExistingRecord
 ): Record? =
 	use { cursor ->
 		if (cursor.moveToNext()) {
-			cursor.readRecord()
+			cursor.readExistingRecord()
 		} else {
 			null
 		}

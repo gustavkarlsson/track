@@ -34,7 +34,11 @@ internal class SqliteNag(
 		val keySelection = listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
 		val filterSelections = createFilterSelections(filters)
 		val selections = keySelection + filterSelections
-		val cursor = helper.query(selections, order)
+		val orderBy = when (order) {
+			Order.OldestFirst -> OrderBy.Ascending(Table.COLUMN_TIMESTAMP)
+			Order.NewestFirst -> OrderBy.Descending(Table.COLUMN_TIMESTAMP)
+		}
+		val cursor = helper.query(selections, orderBy)
 		return CloseableRecordCursorSequence(cursor)
 	}
 
