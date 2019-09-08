@@ -1,11 +1,13 @@
 package se.gustavkarlsson.nag.sqlite
 
+import android.database.Cursor
 import se.gustavkarlsson.nag.*
 
 internal class SqliteNag(
 	private val helper: Helper,
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
-	private val appVersion: Int = BuildConfig.VERSION_CODE
+	private val appVersion: Int = BuildConfig.VERSION_CODE,
+	private val tryGetRecordAndClose: Cursor.() -> Record? = { tryGetRecordAndClose(Cursor::readExistingRecord) }
 ) : Nag {
 	override fun getSingle(key: String): Record? {
 		val selections = listOf(

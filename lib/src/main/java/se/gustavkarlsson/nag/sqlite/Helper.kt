@@ -13,7 +13,8 @@ internal class Helper(
 	databaseName: String? = Database.NAME,
 	databaseVersion: Int = Database.VERSION,
 	private val table: String = Table.NAME,
-	private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT)
+	private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT),
+	private val toContentValues: Map<String, Any?>.() -> ContentValues = Map<String, Any?>::toContentValues
 ) : SQLiteOpenHelper(
 	context,
 	databaseName,
@@ -104,22 +105,3 @@ internal enum class Operator(val sql: String) {
 	Equals("="),
 	NotEquals("<>")
 }
-
-private fun Map<String, Any?>.toContentValues(): ContentValues =
-	ContentValues(values.size).apply {
-		forEach { (column, value) ->
-			when (value) {
-				null -> putNull(column)
-				is Boolean -> put(column, value)
-				is ByteArray -> put(column, value)
-				is Byte -> put(column, value)
-				is Short -> put(column, value)
-				is Int -> put(column, value)
-				is Long -> put(column, value)
-				is Float -> put(column, value)
-				is Double -> put(column, value)
-				is String -> put(column, value)
-				else -> throw IllegalArgumentException("Unsupported type: ${value.javaClass}")
-			}
-		}
-	}

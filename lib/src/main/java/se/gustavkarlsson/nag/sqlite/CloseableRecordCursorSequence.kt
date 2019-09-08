@@ -5,7 +5,8 @@ import se.gustavkarlsson.nag.CloseableSequence
 import se.gustavkarlsson.nag.Record
 
 internal class CloseableRecordCursorSequence(
-	private val cursor: Cursor
+	private val cursor: Cursor,
+	private val readRecord: Cursor.() -> Record = Cursor::readExistingRecord
 ) : CloseableSequence<Record> {
 	private val sequence: Sequence<Record> = sequence {
 		cursor.use { cursor ->
