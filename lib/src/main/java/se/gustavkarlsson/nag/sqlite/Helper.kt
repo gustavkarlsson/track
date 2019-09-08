@@ -5,95 +5,55 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.provider.BaseColumns
+import se.gustavkarlsson.nag.Order
 import java.io.File
 
-const val DATABASE_NAME = "nag.db"
-const val DATABASE_VERSION = 1
-
-object SingletonRecordTableV1 {
-	const val NAME = "singleton_record"
-	const val COLUMN_ID = BaseColumns._ID
-	const val COLUMN_KEY = "key"
-	const val COLUMN_TIMESTAMP = "timestamp"
-	const val COLUMN_APP_VERSION = "app_version"
-	const val COLUMN_VALUE = "value"
-	val SQL_CREATE_TABLE = """
-		|CREATE TABLE $NAME (
-		|$COLUMN_ID INTEGER PRIMARY KEY,
-		|$COLUMN_KEY TEXT UNIQUE,
-		|$COLUMN_TIMESTAMP INTEGER,
-		|$COLUMN_APP_VERSION INTEGER,
-		|$COLUMN_VALUE TEXT)
-	""".trimMargin()
-}
-
-object MultiRecordTableV1 {
-	const val NAME = "multi_record"
-	const val COLUMN_ID = BaseColumns._ID
-	const val COLUMN_KEY = "key"
-	const val COLUMN_TIMESTAMP = "timestamp"
-	const val COLUMN_APP_VERSION = "app_version"
-	const val COLUMN_VALUE = "value"
-	val SQL_CREATE_TABLE = """
-		|CREATE TABLE $NAME (
-		|$COLUMN_ID INTEGER PRIMARY KEY,
-		|$COLUMN_KEY TEXT,
-		|$COLUMN_TIMESTAMP INTEGER,
-		|$COLUMN_APP_VERSION INTEGER,
-		|$COLUMN_VALUE TEXT)
-	""".trimMargin()
-}
-
-val SingletonRecordTable = SingletonRecordTableV1
-val MultiRecordTable = MultiRecordTableV1
-
-// FIXME don't hardcode values?
-internal class Helper(context: Context, inMemory: Boolean = false) : SQLiteOpenHelper(
+internal class Helper(
+	context: Context,
+	databaseName: String? = Database.NAME,
+	databaseVersion: Int = Database.VERSION,
+	private val table: String = Table.NAME,
+	private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT)
+) : SQLiteOpenHelper(
 	context,
-	if (inMemory) DATABASE_NAME else null,
+	databaseName,
 	null,
-	DATABASE_VERSION
+	databaseVersion
 ) {
 	override fun onCreate(db: SQLiteDatabase) {
-		db.execSQL(SingletonRecordTableV1.SQL_CREATE_TABLE)
-		db.execSQL(MultiRecordTableV1.SQL_CREATE_TABLE)
+		createStatements.forEach(db::execSQL)
 	}
 
 	override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
 		error("DB upgrade not configured from version $oldVersion-$newVersion")
 	}
 
-	fun query(
-		table: String,
-		selections: List<Selection>,
-		order: Order? = null
-	): Cursor =
+	fun query(selections: List<Selection>, order: Order? = null, limit: Int? = null): Cursor =
 		readableDatabase.query(
 			table,
 			null,
-			selections.map(Selection::selectionSql).joinToString(" AND "),
-			selections.map(Selection::selectionArgSql).toTypedArray(),
+			selections.toSelectionSql(),
+			selections.toSelectionArgSql(),
 			null,
 			null,
-			order?.sql
+			order?.toSql(),
+			limit?.let(Int::toString)
 		)
 
-	fun insert(table: String, values: Map<String, Any>) {
-		writableDatabase.insertOrThrow(table, null, values.toContentValues())
+	fun insert(row: Map<String, Any>) {
+		writableDatabase.insertOrThrow(table, null, row.toContentValues())
 	}
 
-	fun upsert(
-		table: String,
-		whereColumnName: String,
-		whereColumnValue: String,
-		values: Map<String, Any>
-	) {
+	fun upsert(selections: List<Selection>, row: Map<String, Any>) {
 		writableDatabase.run {
 			beginTransaction()
 			try {
-				delete(table, "$whereColumnName = ?", arrayOf(whereColumnValue))
-				insertOrThrow(table, null, values.toContentValues())
+				delete(
+					table,
+					selections.toSelectionSql(),
+					selections.toSelectionArgSql()
+				)
+				insertOrThrow(table, null, row.toContentValues())
 				setTransactionSuccessful()
 			} finally {
 				endTransaction()
@@ -101,34 +61,32 @@ internal class Helper(context: Context, inMemory: Boolean = false) : SQLiteOpenH
 		}
 	}
 
-	fun delete(table: String, selections: List<Selection>) {
+	fun delete(selections: List<Selection>) {
 		writableDatabase.delete(
 			table,
-			selections.map(Selection::selectionSql).joinToString(" AND "),
-			selections.map(Selection::selectionArgSql).toTypedArray()
+			selections.toSelectionSql(),
+			selections.toSelectionArgSql()
 		)
 	}
 
 	fun deleteDatabase() {
-		SQLiteDatabase.deleteDatabase(File(DATABASE_NAME)) // FIXME verify
-	}
-
-	sealed class Order {
-		abstract val sql: String
-
-		data class Ascending(val column: String) : Order() {
-			override val sql: String
-				get() = "$column ASC"
-		}
-
-		data class Descending(val column: String) : Order() {
-			override val sql: String
-				get() = "$column DESC"
-		}
+		SQLiteDatabase.deleteDatabase(File(databaseName))
 	}
 }
 
-data class Selection(
+private fun List<Selection>.toSelectionSql() =
+	map(Selection::selectionSql).joinToString(" AND ")
+
+private fun List<Selection>.toSelectionArgSql() =
+	map(Selection::selectionArgSql).toTypedArray()
+
+private fun Order.toSql(): String =
+	when (this) {
+		Order.OldestFirst -> "${Table.COLUMN_TIMESTAMP} ASC"
+		Order.NewestFirst -> "${Table.COLUMN_TIMESTAMP} DESC"
+	}
+
+internal data class Selection(
 	private val column: String,
 	private val operator: Operator,
 	private val value: Any
@@ -140,17 +98,18 @@ data class Selection(
 		get() = value.toString()
 }
 
-enum class Operator(val sql: String) {
+internal enum class Operator(val sql: String) {
 	LessThan("<"),
 	GreaterThan(">"),
 	Equals("="),
 	NotEquals("<>")
 }
 
-private fun Map<String, Any>.toContentValues(): ContentValues =
+private fun Map<String, Any?>.toContentValues(): ContentValues =
 	ContentValues(values.size).apply {
 		forEach { (column, value) ->
 			when (value) {
+				null -> putNull(column)
 				is Boolean -> put(column, value)
 				is ByteArray -> put(column, value)
 				is Byte -> put(column, value)

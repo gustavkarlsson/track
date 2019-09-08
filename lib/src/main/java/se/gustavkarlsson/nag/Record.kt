@@ -1,6 +1,6 @@
 package se.gustavkarlsson.nag
 
-data class MultiRecord(
+data class Record(
 	val id: Long,
 	val key: String,
 	val timestamp: Long,

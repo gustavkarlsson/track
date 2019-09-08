@@ -2,15 +2,16 @@ package se.gustavkarlsson.nag.sqlite
 
 import android.database.Cursor
 import se.gustavkarlsson.nag.CloseableSequence
+import se.gustavkarlsson.nag.Record
 
-internal abstract class CloseableCursorSequence<T>(
+internal class CloseableRecordCursorSequence(
 	private val cursor: Cursor
-) : CloseableSequence<T> {
-	private val sequence: Sequence<T> = sequence {
+) : CloseableSequence<Record> {
+	private val sequence: Sequence<Record> = sequence {
 		cursor.use { cursor ->
 			var hasData = cursor.hasData
 			while (hasData) {
-				val entity = cursor.readEntity()
+				val entity = cursor.readRecord()
 				hasData = cursor.hasData
 				yield(entity)
 			}
@@ -25,9 +26,9 @@ internal abstract class CloseableCursorSequence<T>(
 			false
 		}
 
-	override fun iterator(): Iterator<T> = sequence.iterator()
+	override fun iterator(): Iterator<Record> = sequence.iterator()
 
 	override fun close() = cursor.close()
 
-	protected abstract fun Cursor.readEntity(): T
+	override val isClosed: Boolean get() = cursor.isClosed
 }
