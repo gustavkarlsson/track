@@ -18,7 +18,7 @@ object Versions {
 	// Test
 	val junit = "4.12"
 	val assertk = "0.19"
-	val mockito = "3.0.7"
+	val mockito = "3.0.0"
 	val mockitoKotlin = "2.2.0"
 }
 

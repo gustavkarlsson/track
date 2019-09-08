@@ -19,4 +19,8 @@ android {
 
 dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}")
+	testImplementation("junit:junit:${versions.junit}")
+	testImplementation("com.willowtreeapps.assertk:assertk-jvm:${versions.assertk}")
+	testImplementation("org.mockito:mockito-core:${versions.mockito}")
+	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:${versions.mockitoKotlin}")
 }
