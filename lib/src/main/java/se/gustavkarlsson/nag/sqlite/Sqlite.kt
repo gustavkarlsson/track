@@ -40,7 +40,7 @@ internal class Sqlite(
 			selections.toSelectionArgSql(),
 			null,
 			null,
-			orderBy?.sql,
+			orderBy?.toSql(),
 			limit?.let(Int::toString)
 		)
 

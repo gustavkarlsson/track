@@ -27,9 +27,9 @@ internal class SqliteNag(
 	override fun query(
 		key: String,
 		order: Order,
-		where: WhereBuilder.() -> Unit
+		filters: FiltersBuilder.() -> Unit
 	): CloseableSequence<Record> {
-		val selections = createKeySelection(key) + where.toSelections()
+		val selections = createKeySelection(key) + filters.toSelections()
 		val orderBy = when (order) {
 			Order.Ascending -> OrderBy.Ascending(Table.COLUMN_ID)
 			Order.Descending -> OrderBy.Descending(Table.COLUMN_ID)
@@ -56,8 +56,8 @@ internal class SqliteNag(
 		return sqlite.delete(selections) > 0
 	}
 
-	override fun remove(key: String, where: WhereBuilder.() -> Unit): Int {
-		val selections = createKeySelection(key) + where.toSelections()
+	override fun remove(key: String, filters: FiltersBuilder.() -> Unit): Int {
+		val selections = createKeySelection(key) + filters.toSelections()
 		return sqlite.delete(selections)
 	}
 
@@ -66,8 +66,8 @@ internal class SqliteNag(
 	private fun createKeySelection(key: String) =
 		listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
 
-	private fun (WhereBuilder.() -> Unit).toSelections(): List<Selection> =
-		WhereBuilder()
+	private fun (FiltersBuilder.() -> Unit).toSelections(): List<Selection> =
+		FiltersBuilder()
 			.apply(this)
 			.build()
 			.map(toSelection)

@@ -1,6 +1,6 @@
 package se.gustavkarlsson.nag
 
-class WhereBuilder internal constructor() {
+class FiltersBuilder internal constructor() {
 	private val filters = mutableListOf<Filter<*>>()
 
 	val id: Field<Long> get() = Field.Id

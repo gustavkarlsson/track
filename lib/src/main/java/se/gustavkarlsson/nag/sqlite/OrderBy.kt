@@ -1,13 +1,13 @@
 package se.gustavkarlsson.nag.sqlite
 
 internal sealed class OrderBy {
-	abstract val sql: String
+	abstract fun toSql(): String
 
 	data class Ascending(val column: String) : OrderBy() {
-		override val sql get() = "$column ASC"
+		override fun toSql() = "$column ASC"
 	}
 
 	data class Descending(val column: String) : OrderBy() {
-		override val sql get() = "$column DESC"
+		override fun toSql() = "$column DESC"
 	}
 }

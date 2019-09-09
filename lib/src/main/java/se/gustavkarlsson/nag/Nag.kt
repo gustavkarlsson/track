@@ -11,12 +11,12 @@ interface Nag {
 	fun query(
 		key: String,
 		order: Order = Order.Ascending,
-		where: WhereBuilder.() -> Unit = {}
+		filters: FiltersBuilder.() -> Unit = {}
 	): CloseableSequence<Record>
 
 	fun add(key: String, value: String = "")
 	fun remove(id: Long): Boolean
-	fun remove(key: String, where: WhereBuilder.() -> Unit = {}): Int
+	fun remove(key: String, filters: FiltersBuilder.() -> Unit = {}): Int
 	fun deleteDatabase(): Boolean
 
 	companion object : Nag {
@@ -37,15 +37,15 @@ interface Nag {
 		override fun query(
 			key: String,
 			order: Order,
-			where: WhereBuilder.() -> Unit
-		) = delegate.query(key, order, where)
+			filters: FiltersBuilder.() -> Unit
+		) = delegate.query(key, order, filters)
 
 		override fun add(key: String, value: String) = delegate.add(key, value)
 
 		override fun remove(id: Long) = delegate.remove(id)
 
-		override fun remove(key: String, where: WhereBuilder.() -> Unit) =
-			delegate.remove(key, where)
+		override fun remove(key: String, filters: FiltersBuilder.() -> Unit) =
+			delegate.remove(key, filters)
 
 		override fun deleteDatabase() = delegate.deleteDatabase()
 	}

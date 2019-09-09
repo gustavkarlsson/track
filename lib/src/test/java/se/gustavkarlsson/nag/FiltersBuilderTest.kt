@@ -4,11 +4,11 @@ import assertk.assertThat
 import assertk.assertions.containsExactly
 import org.junit.Test
 
-class WhereBuilderTest {
+class FiltersBuilderTest {
 
 	@Test
 	fun `correct filters added`() {
-		val filters = WhereBuilder().apply {
+		val filters = FiltersBuilder().apply {
 			timestamp isLessThan 1
 			id isGreaterThan 2
 			appVersion isEqualTo 3

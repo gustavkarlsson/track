@@ -10,7 +10,7 @@ internal data class Selection(
 	private val value: Any?
 ) {
 	val selectionSql: String
-		get() = "$column ${operator.sql} ?"
+		get() = "$column ${operator.toSql()} ?"
 
 	val selectionArgSql: String
 		get() = when (value) {
@@ -19,8 +19,8 @@ internal data class Selection(
 		}
 }
 
-private val Operator<*>.sql
-	get() = when (this) {
+private fun Operator<*>.toSql() =
+	when (this) {
 		Operator.LessThan -> "<"
 		Operator.GreaterThan -> ">"
 		Operator.Equals -> "="
