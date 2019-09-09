@@ -9,11 +9,11 @@ internal data class Selection(
 	private val operator: Operator<*>,
 	private val value: Any?
 ) {
-	val selectionSql: String
-		get() = "$column ${operator.toSql()} ?"
+	fun toSelectionSql(): String
+		= "$column ${operator.toSql()} ?"
 
-	val selectionArgSql: String
-		get() = when (value) {
+	fun toSelectionArgSql(): String =
+		when (value) {
 			is Boolean -> if (value) "1" else "0"
 			else -> value.toString()
 		}
@@ -28,10 +28,10 @@ private fun Operator<*>.toSql() =
 	}
 
 internal fun List<Selection>.toSelectionSql(): String =
-	map(Selection::selectionSql).joinToString(" AND ")
+	joinToString(" AND ", transform = Selection::toSelectionSql)
 
 internal fun List<Selection>.toSelectionArgSql(): Array<String> =
-	map(Selection::selectionArgSql).toTypedArray()
+	map(Selection::toSelectionArgSql).toTypedArray()
 
 internal fun Filter<*>.toSelection(): Selection {
 	val column = when (this.field) {
