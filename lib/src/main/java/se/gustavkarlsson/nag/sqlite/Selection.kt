@@ -1,10 +1,12 @@
 package se.gustavkarlsson.nag.sqlite
 
+import se.gustavkarlsson.nag.Field
 import se.gustavkarlsson.nag.Filter
+import se.gustavkarlsson.nag.Operator
 
 internal data class Selection(
 	private val column: String,
-	private val operator: Operator,
+	private val operator: Operator<*>,
 	private val value: Any?
 ) {
 	val selectionSql: String
@@ -17,12 +19,13 @@ internal data class Selection(
 		}
 }
 
-internal enum class Operator(val sql: String) {
-	LessThan("<"),
-	GreaterThan(">"),
-	Equals("="),
-	NotEquals("<>")
-}
+private val Operator<*>.sql
+	get() = when (this) {
+		Operator.LessThan -> "<"
+		Operator.GreaterThan -> ">"
+		Operator.Equals -> "="
+		Operator.NotEquals -> "<>"
+	}
 
 internal fun List<Selection>.toSelectionSql(): String =
 	map(Selection::selectionSql).joinToString(" AND ")
@@ -30,46 +33,12 @@ internal fun List<Selection>.toSelectionSql(): String =
 internal fun List<Selection>.toSelectionArgSql(): Array<String> =
 	map(Selection::selectionArgSql).toTypedArray()
 
-internal fun Filter.toSelection() =
-	when (this) {
-		is Filter.Before -> Selection(
-			Table.COLUMN_TIMESTAMP,
-			Operator.LessThan,
-			timestamp
-		)
-		is Filter.After -> Selection(
-			Table.COLUMN_TIMESTAMP,
-			Operator.GreaterThan,
-			timestamp
-		)
-		is Filter.VersionIs -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.Equals,
-			version
-		)
-		is Filter.VersionIsNot -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.NotEquals,
-			version
-		)
-		is Filter.VersionLessThan -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.LessThan,
-			version
-		)
-		is Filter.VersionGreaterThan -> Selection(
-			Table.COLUMN_APP_VERSION,
-			Operator.GreaterThan,
-			version
-		)
-		is Filter.ValueIs -> Selection(
-			Table.COLUMN_VALUE,
-			Operator.Equals,
-			value
-		)
-		is Filter.ValueIsNot -> Selection(
-			Table.COLUMN_VALUE,
-			Operator.NotEquals,
-			value
-		)
+internal fun Filter<*>.toSelection(): Selection {
+	val column = when (this.field) {
+		is Field.Id -> Table.COLUMN_ID
+		is Field.Timestamp -> Table.COLUMN_TIMESTAMP
+		is Field.AppVersion -> Table.COLUMN_APP_VERSION
+		is Field.Value -> Table.COLUMN_VALUE
 	}
+	return Selection(column, operator, argument)
+}

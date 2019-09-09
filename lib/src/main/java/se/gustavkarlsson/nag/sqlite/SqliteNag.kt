@@ -9,7 +9,7 @@ internal class SqliteNag(
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
 	private val tryGetRecordAndClose: Cursor.() -> Record? =
 		{ tryGetRecordAndClose(Cursor::readExistingRecord) },
-	private val toSelection: Filter.() -> Selection = Filter::toSelection
+	private val toSelection: Filter<*>.() -> Selection = Filter<*>::toSelection
 ) : Nag {
 	override fun get(key: String): Record? {
 		val selections =
@@ -27,9 +27,9 @@ internal class SqliteNag(
 	override fun query(
 		key: String,
 		order: Order,
-		filtersConfigBlock: FiltersConfig.() -> Unit
+		where: WhereBuilder.() -> Unit
 	): CloseableSequence<Record> {
-		val selections = createKeySelection(key) + filtersConfigBlock.toSelections()
+		val selections = createKeySelection(key) + where.toSelections()
 		val orderBy = when (order) {
 			Order.Ascending -> OrderBy.Ascending(Table.COLUMN_ID)
 			Order.Descending -> OrderBy.Descending(Table.COLUMN_ID)
@@ -56,8 +56,8 @@ internal class SqliteNag(
 		return sqlite.delete(selections) > 0
 	}
 
-	override fun remove(key: String, filtersConfigBlock: FiltersConfig.() -> Unit): Int {
-		val selections = createKeySelection(key) + filtersConfigBlock.toSelections()
+	override fun remove(key: String, where: WhereBuilder.() -> Unit): Int {
+		val selections = createKeySelection(key) + where.toSelections()
 		return sqlite.delete(selections)
 	}
 
@@ -66,6 +66,9 @@ internal class SqliteNag(
 	private fun createKeySelection(key: String) =
 		listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
 
-	private fun (FiltersConfig.() -> Unit).toSelections(): List<Selection> =
-		FiltersConfig().apply(this).filters.map(toSelection)
+	private fun (WhereBuilder.() -> Unit).toSelections(): List<Selection> =
+		WhereBuilder()
+			.apply(this)
+			.build()
+			.map(toSelection)
 }
