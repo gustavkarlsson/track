@@ -8,7 +8,7 @@ internal class CloseableRecordCursorSequence(
 	private val cursor: Cursor,
 	private val readExistingRecord: Cursor.() -> Record = Cursor::readExistingRecord
 ) : CloseableSequence<Record> {
-	private val sequence: Sequence<Record> = sequence {
+	private val sequence = sequence {
 		cursor.use { cursor ->
 			var hasData = cursor.hasData
 			while (hasData) {
@@ -27,9 +27,9 @@ internal class CloseableRecordCursorSequence(
 			false
 		}
 
-	override fun iterator(): Iterator<Record> = sequence.iterator()
+	override fun iterator() = sequence.iterator()
 
 	override fun close() = cursor.close()
 
-	override val isClosed: Boolean get() = cursor.isClosed
+	override val isClosed get() = cursor.isClosed
 }
