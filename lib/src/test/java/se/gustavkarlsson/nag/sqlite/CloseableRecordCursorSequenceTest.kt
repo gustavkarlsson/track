@@ -1,8 +1,6 @@
 package se.gustavkarlsson.nag.sqlite
 
-import android.database.Cursor
 import assertk.assertThat
-import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
@@ -20,12 +18,28 @@ class CloseableRecordCursorSequenceTest {
 
 	var cursorIndex = -1
 
-	private val mockCursor = mock<Cursor> {
+	private val mockCursor = mock<RecordCursor> {
 		var closed = false
 
-		on { moveToNext() }.then {
-			cursorIndex++
-			records.size > cursorIndex
+		on { readExistingRecord() }.then {
+			if (closed) error("Closed")
+			records[cursorIndex]
+		}
+
+		on { tryGetRecordAndClose() }.then {
+			if (closed) error("Closed")
+			closed = true
+			records.getOrNull(++cursorIndex)
+		}
+
+		on { checkForDataOrClose() }.then {
+			if (closed) error("Closed")
+			if (records.size > ++cursorIndex) {
+				true
+			} else {
+				closed = true
+				false
+			}
 		}
 
 		on { close() }.then {
@@ -36,9 +50,7 @@ class CloseableRecordCursorSequenceTest {
 		on { isClosed }.then { closed }
 	}
 
-	private val readExistingRecord: Cursor.() -> Record = { records[cursorIndex] }
-
-	private val underTest = CloseableRecordCursorSequence(mockCursor, readExistingRecord)
+	private val underTest = CloseableRecordCursorSequence(mockCursor)
 
 	@Test
 	fun `initially not closed`() {

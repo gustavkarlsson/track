@@ -7,14 +7,13 @@ internal class SqliteNag(
 	private val sqlite: Sqlite,
 	private val appVersion: Long,
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
-	private val tryGetRecordAndClose: Cursor.() -> Record? =
-		{ tryGetRecordAndClose(Cursor::readExistingRecord) },
+	private val toRecordCursor: Cursor.() -> RecordCursor = ::DefaultRecordCursor,
 	private val toSelection: Filter<*>.() -> Selection = Filter<*>::toSelection
 ) : Nag {
 	override fun get(key: String): Record? {
 		val selections =
 			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
-		val cursor = sqlite.query(selections, limit = 1)
+		val cursor = sqlite.query(selections, limit = 1).toRecordCursor()
 		return cursor.tryGetRecordAndClose()
 	}
 
@@ -34,7 +33,7 @@ internal class SqliteNag(
 			Order.Ascending -> OrderBy.Ascending(Table.COLUMN_ID)
 			Order.Descending -> OrderBy.Descending(Table.COLUMN_ID)
 		}
-		val cursor = sqlite.query(selections, orderBy)
+		val cursor = sqlite.query(selections, orderBy).toRecordCursor()
 		return CloseableRecordCursorSequence(cursor)
 	}
 
