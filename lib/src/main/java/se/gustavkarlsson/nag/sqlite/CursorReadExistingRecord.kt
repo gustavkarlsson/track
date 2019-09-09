@@ -24,3 +24,5 @@ private inline operator fun <reified T> Cursor.get(column: String): T {
 		else -> throw IllegalArgumentException("Could not read ${T::class} from $column")
 	} as T
 }
+
+// TODO RecordCursor class?

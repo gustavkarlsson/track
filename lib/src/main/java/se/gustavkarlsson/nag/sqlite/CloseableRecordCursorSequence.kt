@@ -10,17 +10,17 @@ internal class CloseableRecordCursorSequence(
 ) : CloseableSequence<Record> {
 	private val sequence = sequence {
 		cursor.use { cursor ->
-			var hasData = cursor.hasData
+			var hasData = cursor.checkForData()
 			while (hasData) {
 				val record = cursor.readExistingRecord()
-				hasData = cursor.hasData
+				hasData = cursor.checkForData()
 				yield(record)
 			}
 		}
 	}
 
-	private val Cursor.hasData
-		get() = if (moveToNext()) {
+	private fun Cursor.checkForData() =
+		if (moveToNext()) {
 			true
 		} else {
 			close()
