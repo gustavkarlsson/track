@@ -4,7 +4,54 @@ Simple on-device event tracking and querying for Android
 
 ---
 
-## Some examples
+## Usage
+
+Initialize in Application `onCreate`
+
+```kotlin
+Track.initialize(this)
+```
+
+Track events using a single variable
+
+```kotlin
+Track.set("used_feature_x", "value")
+```
+
+... or track multiple events per key
+
+```kotlin
+Track.add("used_feature_x", "value")
+```
+
+Read a single variable record back
+
+```kotlin
+val record = Track.get("used_feature_x")
+```
+
+... or use advanced queries for large amounts of data
+
+```kotlin
+val recordSequence = Track.query("used_feature_x", order = Order.Descending) {
+    appVersion isGreaterThan 12
+    value isNotEqualTo "forbidden"
+}
+```
+
+Records look like this:
+
+```kotlin
+data class Record(
+    val id: Long,
+    val key: String,
+    val timestamp: Long,
+    val appVersion: Long,
+    val value: String
+)
+```
+
+## Some use cases
 
 Track every app launch and show onboarding screen first time
 
