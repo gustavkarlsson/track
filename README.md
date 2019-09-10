@@ -12,25 +12,31 @@ Initialize in Application `onCreate`
 Track.initialize(this)
 ```
 
-Track events using a single variable
+Track events using a single variable with `set`
 
 ```kotlin
 Track.set("used_feature_x", "value")
 ```
 
-... or track multiple events per key
+... or track multiple events per key with `add`
 
 ```kotlin
 Track.add("used_feature_x", "value")
 ```
 
-Read a single variable record back
+Read a single variable record back with `get`
 
 ```kotlin
 val record = Track.get("used_feature_x")
 ```
 
-... or use advanced queries for large amounts of data
+... or use a `query` multiple events
+
+```kotlin
+val recordSequence = Track.query("used_feature_x")
+```
+
+You can also do more advanced queries
 
 ```kotlin
 val recordSequence = Track.query("used_feature_x", order = Order.Descending) {
