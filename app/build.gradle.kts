@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "se.gustavkarlsson.nag.demo"
+        applicationId = "se.gustavkarlsson.track.demo"
         minSdkVersion(versions.minSdk)
         targetSdkVersion(versions.targetSdk)
         versionCode = 1

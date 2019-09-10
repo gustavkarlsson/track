@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 import android.content.ContentValues
 import android.content.Context

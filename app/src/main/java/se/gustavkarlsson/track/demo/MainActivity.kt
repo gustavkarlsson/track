@@ -1,9 +1,9 @@
-package se.gustavkarlsson.nag.demo
+package se.gustavkarlsson.track.demo
 
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import se.gustavkarlsson.nag.Nag
+import se.gustavkarlsson.track.Track
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,9 +11,9 @@ class MainActivity : AppCompatActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 
-		Nag.initialize(this)
-		Nag.add("activity_started")
-		val result = Nag.query("activity_started").count()
+		Track.initialize(this)
+		Track.add("activity_started")
+		val result = Track.query("activity_started").count()
 		Toast.makeText(this, "Activity started $result times", Toast.LENGTH_LONG)
 			.show()
 	}

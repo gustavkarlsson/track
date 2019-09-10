@@ -1,7 +1,7 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
-import se.gustavkarlsson.nag.CloseableSequence
-import se.gustavkarlsson.nag.Record
+import se.gustavkarlsson.track.CloseableSequence
+import se.gustavkarlsson.track.Record
 
 internal class CloseableRecordCursorSequence(
 	private val cursor: RecordCursor

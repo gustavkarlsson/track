@@ -1,7 +1,7 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
-import se.gustavkarlsson.nag.Record
+import se.gustavkarlsson.track.Record
 import java.io.Closeable
 
 internal interface RecordCursor : Closeable {

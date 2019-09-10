@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 internal sealed class OrderBy {
 	abstract fun toSql(): String

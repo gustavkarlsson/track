@@ -1,8 +1,8 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
-import se.gustavkarlsson.nag.Field
-import se.gustavkarlsson.nag.Filter
-import se.gustavkarlsson.nag.Operator
+import se.gustavkarlsson.track.Field
+import se.gustavkarlsson.track.Filter
+import se.gustavkarlsson.track.Operator
 
 internal data class Selection(
 	private val column: String,

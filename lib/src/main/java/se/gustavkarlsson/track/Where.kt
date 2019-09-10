@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag
+package se.gustavkarlsson.track
 
 class FiltersBuilder internal constructor() {
 	private val filters = mutableListOf<Filter<*>>()

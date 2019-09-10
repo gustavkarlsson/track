@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
 import assertk.assertThat
@@ -10,8 +10,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.Test
-import se.gustavkarlsson.nag.Record
-import java.lang.Exception
+import se.gustavkarlsson.track.Record
 
 class DefaultRecordCursorTest {
 

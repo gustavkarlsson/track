@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag
+package se.gustavkarlsson.track
 
 import assertk.assertThat
 import assertk.assertions.containsExactly

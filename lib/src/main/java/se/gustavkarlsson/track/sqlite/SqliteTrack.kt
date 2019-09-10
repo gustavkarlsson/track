@@ -1,15 +1,15 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
-import se.gustavkarlsson.nag.*
+import se.gustavkarlsson.track.*
 
-internal class SqliteNag(
+internal class SqliteTrack(
 	private val sqlite: Sqlite,
 	private val appVersion: Long,
 	private val getTimestamp: () -> Long = System::currentTimeMillis,
 	private val toRecordCursor: Cursor.() -> RecordCursor = ::DefaultRecordCursor,
 	private val toSelection: Filter<*>.() -> Selection = Filter<*>::toSelection
-) : Nag {
+) : Track {
 	override fun get(key: String): Record? {
 		val selections =
 			createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)

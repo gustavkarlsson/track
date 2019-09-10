@@ -1,11 +1,11 @@
-package se.gustavkarlsson.nag
+package se.gustavkarlsson.track
 
 import android.content.Context
 import android.os.Build
-import se.gustavkarlsson.nag.sqlite.Sqlite
-import se.gustavkarlsson.nag.sqlite.SqliteNag
+import se.gustavkarlsson.track.sqlite.Sqlite
+import se.gustavkarlsson.track.sqlite.SqliteTrack
 
-interface Nag {
+interface Track {
 	fun get(key: String): Record?
 	fun set(key: String, value: String = "")
 	fun query(
@@ -19,15 +19,15 @@ interface Nag {
 	fun remove(key: String, filters: FiltersBuilder.() -> Unit = {}): Int
 	fun deleteDatabase(): Boolean
 
-	companion object : Nag {
-		private var initializedDelegate: Nag? = null
-		private inline val delegate: Nag
+	companion object : Track {
+		private var initializedDelegate: Track? = null
+		private inline val delegate: Track
 			get() = requireNotNull(initializedDelegate) {
-				"Nag is not yet initialized. Run initialize() first"
+				"Track is not yet initialized. Run initialize() first"
 			}
 
 		fun initialize(context: Context) {
-			initializedDelegate = SqliteNag(Sqlite(context), context.appVersion)
+			initializedDelegate = SqliteTrack(Sqlite(context), context.appVersion)
 		}
 
 		override fun get(key: String) = delegate.get(key)

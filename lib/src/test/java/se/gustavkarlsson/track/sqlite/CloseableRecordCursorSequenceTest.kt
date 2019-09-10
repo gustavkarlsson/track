@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -7,7 +7,7 @@ import assertk.assertions.isTrue
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.Test
-import se.gustavkarlsson.nag.Record
+import se.gustavkarlsson.track.Record
 
 class CloseableRecordCursorSequenceTest {
 

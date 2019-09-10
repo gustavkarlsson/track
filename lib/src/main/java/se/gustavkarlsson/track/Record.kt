@@ -1,4 +1,4 @@
-package se.gustavkarlsson.nag
+package se.gustavkarlsson.track
 
 data class Record(
 	val id: Long,

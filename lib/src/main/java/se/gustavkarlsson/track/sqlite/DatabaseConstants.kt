@@ -1,9 +1,9 @@
-package se.gustavkarlsson.nag.sqlite
+package se.gustavkarlsson.track.sqlite
 
 import android.provider.BaseColumns
 
 internal object Database {
-	const val NAME = "nag.db"
+	const val NAME = "track.db"
 	const val VERSION = 1
 }
 
