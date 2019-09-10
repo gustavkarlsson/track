@@ -4,22 +4,22 @@ import se.gustavkarlsson.track.CloseableSequence
 import se.gustavkarlsson.track.Record
 
 internal class CloseableRecordCursorSequence(
-	private val cursor: RecordCursor
+    private val cursor: RecordCursor
 ) : CloseableSequence<Record> {
-	private val sequence = sequence {
-		cursor.use { cursor ->
-			var hasData = cursor.checkForDataOrClose()
-			while (hasData) {
-				val record = cursor.readExistingRecord()
-				hasData = cursor.checkForDataOrClose()
-				yield(record)
-			}
-		}
-	}
+    private val sequence = sequence {
+        cursor.use { cursor ->
+            var hasData = cursor.checkForDataOrClose()
+            while (hasData) {
+                val record = cursor.readExistingRecord()
+                hasData = cursor.checkForDataOrClose()
+                yield(record)
+            }
+        }
+    }
 
-	override fun iterator() = sequence.iterator()
+    override fun iterator() = sequence.iterator()
 
-	override fun close() = cursor.close()
+    override fun close() = cursor.close()
 
-	override val isClosed get() = cursor.isClosed
+    override val isClosed get() = cursor.isClosed
 }
