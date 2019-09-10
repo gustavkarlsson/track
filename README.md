@@ -1,6 +1,6 @@
 # Track
 
-Simple on-device event tracking and querying
+Simple on-device event tracking and querying for Android
 
 ---
 
