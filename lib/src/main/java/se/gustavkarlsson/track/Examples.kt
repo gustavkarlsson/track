@@ -2,6 +2,7 @@ package se.gustavkarlsson.track
 
 import android.app.AlertDialog
 import android.content.Context
+import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
 private val context: Context = TODO()
@@ -37,7 +38,7 @@ private fun showTosScreen() {
 
 private fun rateOurApp() {
     val usageCount = Track.query("used_feature_x").count()
-    val thirtyDaysAgo = System.currentTimeMillis() - 2592000000
+    val thirtyDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30)
     val ratedApp = Track.get("rated_app")
     when {
         // User still hasn't used the app enough
