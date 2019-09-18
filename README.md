@@ -30,7 +30,7 @@ Read a single variable record back with `get`
 val record = Track.get("used_feature_x")
 ```
 
-... or use a `query` multiple events
+... or use `query` for multiple events
 
 ```kotlin
 val recordSequence = Track.query("used_feature_x")
