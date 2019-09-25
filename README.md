@@ -30,7 +30,7 @@ Read a single variable record back with `get`
 val record = Track.get("used_feature_x")
 ```
 
-... or use a `query` multiple events
+... or use a `query` for multiple events
 
 ```kotlin
 val recordSequence = Track.query("used_feature_x")
@@ -98,7 +98,7 @@ Ask user to rate app if certain conditions are met
 
 ```kotlin
 val usageCount = Track.query("used_feature_x").count()
-val thirtyDaysAgo = System.currentTimeMillis() - 2592000000
+val thirtyDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30)
 val ratedApp = Track.get("rated_app")
 when {
     // User still hasn't used the app enough

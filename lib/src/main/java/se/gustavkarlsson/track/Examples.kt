@@ -2,6 +2,7 @@ package se.gustavkarlsson.track
 
 import android.app.AlertDialog
 import android.content.Context
+import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
 private val context: Context = TODO()
