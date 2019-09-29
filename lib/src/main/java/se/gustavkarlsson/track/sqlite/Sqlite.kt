@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.annotation.VisibleForTesting
 import java.io.File
 
 internal class Sqlite(
@@ -35,7 +36,7 @@ internal class Sqlite(
     }
 
     fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
-        readableDatabase.use {
+        getReadableDb().use {
             val cursor = it.query(
                 table,
                 null,
@@ -50,13 +51,13 @@ internal class Sqlite(
         }
 
     fun insert(row: Map<String, Any>) {
-        writableDatabase.use {
+        getWritableDb().use {
             it.insertOrThrow(table, null, row.toContentValues())
         }
     }
 
     fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean {
-        return writableDatabase.use {
+        return getWritableDb().use {
             it.beginTransaction()
             try {
                 val deletedCount = it.delete(
@@ -74,7 +75,7 @@ internal class Sqlite(
     }
 
     fun delete(selections: List<Selection>): Int =
-        writableDatabase.use {
+        getWritableDb().use {
             it.delete(
                 table,
                 selections.toSelectionSql(),
@@ -83,8 +84,18 @@ internal class Sqlite(
         }
 
     fun deleteDatabase(): Boolean {
-        val file = readableDatabase.use { File(it.path) }
+        val file = getReadableDb().use { File(it.path) }
         close()
         return SQLiteDatabase.deleteDatabase(file)
+    }
+
+    @VisibleForTesting
+    internal var getReadableDb: SQLiteOpenHelper.() -> SQLiteDatabase = {
+        readableDatabase
+    }
+
+    @VisibleForTesting
+    internal var getWritableDb: SQLiteOpenHelper.() -> SQLiteDatabase = {
+        writableDatabase
     }
 }
