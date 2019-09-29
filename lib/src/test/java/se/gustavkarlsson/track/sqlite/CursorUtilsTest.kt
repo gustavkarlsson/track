@@ -31,7 +31,7 @@ class CursorUtilsTest {
     fun `toRecordSequence no rows`() {
         val sequence = mockCursor.toRecordSequence()
 
-        assertThat(sequence.toList()).isEmpty()
+        assertThat(sequence.toList(), "sequence").isEmpty()
     }
 
     @Test
@@ -40,7 +40,7 @@ class CursorUtilsTest {
 
         val sequence = mockCursor.toRecordSequence()
 
-        assertThat(sequence.toList()).containsExactly(stubRecord1)
+        assertThat(sequence.toList(), "sequence").containsExactly(stubRecord1)
     }
 
     @Test
@@ -49,14 +49,14 @@ class CursorUtilsTest {
 
         val sequence = mockCursor.toRecordSequence()
 
-        assertThat(sequence.toList()).containsExactly(stubRecord1, stubRecord2)
+        assertThat(sequence.toList(), "sequence").containsExactly(stubRecord1, stubRecord2)
     }
 
     @Test
     fun `readOptionalRecord with no rows`() {
         val record = mockCursor.readOptionalRecord()
 
-        assertThat(record).isNull()
+        assertThat(record, "record").isNull()
     }
 
     @Test
@@ -65,7 +65,7 @@ class CursorUtilsTest {
 
         val record = mockCursor.readOptionalRecord()
 
-        assertThat(record).isEqualTo(stubRecord1)
+        assertThat(record, "record").isEqualTo(stubRecord1)
     }
 
     @Test
@@ -74,7 +74,7 @@ class CursorUtilsTest {
 
         val record = mockCursor.readOptionalRecord()
 
-        assertThat(record).isEqualTo(stubRecord1)
+        assertThat(record, "record").isEqualTo(stubRecord1)
     }
 }
 
