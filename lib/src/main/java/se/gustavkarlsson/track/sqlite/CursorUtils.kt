@@ -26,12 +26,14 @@ private fun Cursor.readExistingRecord(): Record = Record(
 private inline operator fun <reified T> Cursor.get(column: String): T {
     val index = getColumnIndexOrThrow(column)
     return when (T::class) {
+        Boolean::class -> getInt(index) != 0
+        ByteArray::class -> getBlob(index)
+        Byte::class -> getInt(index).toByte()
         Short::class -> getShort(index)
         Int::class -> getInt(index)
         Long::class -> getLong(index)
         Float::class -> getFloat(index)
         Double::class -> getDouble(index)
-        ByteArray::class -> getBlob(index)
         String::class -> getString(index)
         else -> throw IllegalArgumentException("Could not read ${T::class} from $column")
     } as T

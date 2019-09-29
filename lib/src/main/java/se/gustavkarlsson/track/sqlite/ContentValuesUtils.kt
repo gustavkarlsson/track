@@ -1,14 +1,18 @@
 package se.gustavkarlsson.track.sqlite
 
 import android.content.ContentValues
+import androidx.annotation.VisibleForTesting
 
 internal fun Map<String, Any?>.toContentValues(): ContentValues {
-    val contentValues = ContentValues(values.size)
+    val contentValues = constructor(values.size)
     forEach { (column, value) ->
         contentValues[column] = value
     }
     return contentValues
 }
+
+@VisibleForTesting
+internal var constructor: (Int) -> ContentValues = ::ContentValues
 
 private operator fun ContentValues.set(column: String, value: Any?) {
     when (value) {
