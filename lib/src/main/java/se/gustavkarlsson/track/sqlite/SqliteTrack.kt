@@ -71,3 +71,9 @@ internal class SqliteTrack(
 
     override fun deleteDatabase() = sqlite.deleteDatabase()
 }
+
+private infix fun String.isEqualTo(value: Any): Selection =
+    Selection(this, Operator.Equals, value)
+
+private infix fun String.isIn(value: Collection<Any>): Selection =
+    Selection(this, Operator.In, value)

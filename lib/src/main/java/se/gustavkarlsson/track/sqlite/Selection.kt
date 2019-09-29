@@ -1,37 +1,40 @@
 package se.gustavkarlsson.track.sqlite
 
 internal data class Selection(
-    private val column: String,
-    private val operator: Operator<*>,
-    private val value: Any?
-) {
-    fun toSelectionSql(): String = "$column ${operator.toSql()} ?"
+    val column: String,
+    val operator: Operator<*>,
+    val value: Any?
+)
 
-    fun toSelectionArgSql(): String = value.toValueSql()
-}
-
-private fun Any?.toValueSql(): String =
-    when (this) {
-        is Boolean -> if (this) "1" else "0"
-        is Collection<*> -> this.joinToString(prefix = "(", postfix = ")") { it.toValueSql() }
-        else -> toString()
-    }
-
-internal infix fun String.isEqualTo(value: Any): Selection =
-    Selection(this, Operator.Equals, value)
-
-internal infix fun String.isIn(value: Collection<Any>): Selection =
-    Selection(this, Operator.In, value)
-
-internal fun List<Selection>?.toSelectionSql(): String? =
-    this
-        ?.takeIf { it.isNotEmpty() }
+internal fun List<Selection>.toSelectionSql(): String? =
+    takeIf { it.isNotEmpty() }
         ?.joinToString(" AND ", transform = Selection::toSelectionSql)
 
-internal fun List<Selection>?.toSelectionArgSql(): Array<String>? =
-    this
-        ?.takeIf { it.isNotEmpty() }
-        ?.map(Selection::toSelectionArgSql)?.toTypedArray()
+private fun Selection.toSelectionSql(): String =
+    if (operator is Operator.In) {
+        val values = when (value) {
+            is Sequence<*> -> value.toList()
+            is Iterable<*> -> value.toList()
+            else -> throw IllegalArgumentException("Unsupported type: ${value?.javaClass}")
+        }
+        val valuesString =
+            values.joinToString(prefix = "(", postfix = ")") { it.toValueSql()!! }
+        "$column ${operator.toSql()} $valuesString"
+    } else {
+        "$column ${operator.toSql()} ?"
+    }
+
+internal fun List<Selection>.toSelectionArgSql(): Array<String> =
+    map(Selection::value)
+        .mapNotNull(Any?::toValueSql)
+        .toTypedArray()
+
+private fun Any?.toValueSql(): String? =
+    when (this) {
+        is Boolean -> if (this) "1" else "0"
+        is Collection<*> -> null
+        else -> toString()
+    }
 
 internal sealed class Operator<T> {
     object LessThan : Operator<Number>()
