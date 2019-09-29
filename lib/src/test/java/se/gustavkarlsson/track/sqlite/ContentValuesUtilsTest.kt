@@ -7,7 +7,7 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import org.junit.Before
 import org.junit.Test
 
-class ContentValuesUtilsKtTest {
+class ContentValuesUtilsTest {
 
     private val mockContentValues = mock<ContentValues>()
 
@@ -17,7 +17,7 @@ class ContentValuesUtilsKtTest {
     }
 
     @Test
-    fun `all supported data types`() {
+    fun `toContentValues with all supported data types`() {
         val map = mapOf(
             "Boolean" to true,
             "ByteArray" to byteArrayOf(1),
@@ -30,6 +30,7 @@ class ContentValuesUtilsKtTest {
             "String" to "Foo",
             "null" to null
         )
+
         map.toContentValues()
 
         verify(mockContentValues).put("Boolean", true)
@@ -46,7 +47,9 @@ class ContentValuesUtilsKtTest {
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun `unsupported type`() {
-        mapOf("foo" to emptyList<String>()).toContentValues()
+    fun `toContentValues with unsupported type`() {
+        val map = mapOf("foo" to emptyList<String>())
+
+        map.toContentValues()
     }
 }

@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.dsl.TestOptions
-
 plugins {
     id("com.android.library")
     id("kotlin-android")
@@ -15,12 +13,6 @@ android {
 
     kotlinOptions {
         jvmTarget = versions.jvmTarget
-    }
-
-    testOptions {
-        unitTests(delegateClosureOf<TestOptions.UnitTestOptions> {
-            isReturnDefaultValues = true
-        })
     }
 
     defaultConfig {
