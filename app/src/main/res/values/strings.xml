@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Track Demo</string>
+    <plurals name="activity_started_n_times">
+        <item quantity="one">Activity started %d time</item>
+        <item quantity="other">Activity started %d times</item>
+    </plurals>
 </resources>

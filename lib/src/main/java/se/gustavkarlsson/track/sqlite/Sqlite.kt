@@ -12,10 +12,12 @@ internal class Sqlite(
     databaseName: String? = Database.NAME,
     databaseVersion: Int = Database.VERSION,
     private val table: String = Table.NAME,
-    private val createStatements: List<String> = listOf(Table.CREATE_STATEMENT),
-    private val toSelectionSql: List<Selection>.() -> String = List<Selection>::toSelectionSql,
-    private val toSelectionArgSql: List<Selection>.() -> Array<String> =
-        List<Selection>::toSelectionArgSql,
+    private val createStatements: List<String> =
+        listOf(Table.CREATE_STATEMENT),
+    private val toSelectionSql: List<Selection>?.() -> String? =
+        List<Selection>?::toSelectionSql,
+    private val toSelectionArgSql: List<Selection>?.() -> Array<String>? =
+        List<Selection>?::toSelectionArgSql,
     private val toContentValues: Map<String, Any?>.() -> ContentValues =
         Map<String, Any?>::toContentValues
 ) : SQLiteOpenHelper(
@@ -32,48 +34,56 @@ internal class Sqlite(
         error("DB upgrade not configured from version $oldVersion-$newVersion")
     }
 
-    fun query(selections: List<Selection>, orderBy: OrderBy? = null, limit: Int? = null): Cursor =
-        readableDatabase.query(
-            table,
-            null,
-            selections.toSelectionSql(),
-            selections.toSelectionArgSql(),
-            null,
-            null,
-            orderBy?.toSql(),
-            limit?.let(Int::toString)
-        )
+    fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
+        readableDatabase.use {
+            val cursor = it.query(
+                table,
+                null,
+                selections.toSelectionSql(),
+                selections.toSelectionArgSql(),
+                null,
+                null,
+                null,
+                limit?.let(Int::toString)
+            )
+            cursor.use(block)
+        }
 
     fun insert(row: Map<String, Any>) {
-        writableDatabase.insertOrThrow(table, null, row.toContentValues())
+        writableDatabase.use {
+            it.insertOrThrow(table, null, row.toContentValues())
+        }
     }
 
-    fun upsert(selections: List<Selection>, row: Map<String, Any>) {
-        with(writableDatabase) {
-            beginTransaction()
+    fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean {
+        return writableDatabase.use {
+            it.beginTransaction()
             try {
-                delete(
+                val deletedCount = it.delete(
                     table,
                     selections.toSelectionSql(),
                     selections.toSelectionArgSql()
                 )
-                insertOrThrow(table, null, row.toContentValues())
-                setTransactionSuccessful()
+                it.insertOrThrow(table, null, row.toContentValues())
+                it.setTransactionSuccessful()
+                deletedCount > 0
             } finally {
-                endTransaction()
+                it.endTransaction()
             }
         }
     }
 
     fun delete(selections: List<Selection>): Int =
-        writableDatabase.delete(
-            table,
-            selections.toSelectionSql(),
-            selections.toSelectionArgSql()
-        )
+        writableDatabase.use {
+            it.delete(
+                table,
+                selections.toSelectionSql(),
+                selections.toSelectionArgSql()
+            )
+        }
 
     fun deleteDatabase(): Boolean {
-        val file = File(readableDatabase.path)
+        val file = readableDatabase.use { File(it.path) }
         close()
         return SQLiteDatabase.deleteDatabase(file)
     }

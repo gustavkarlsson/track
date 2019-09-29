@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/fragmentContainer"
+        android:id="@+id/mainTextView"
         android:name="androidx.fragment.app.Fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello Android" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

@@ -1,40 +1,38 @@
 package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
-import se.gustavkarlsson.track.*
+import se.gustavkarlsson.track.Record
+import se.gustavkarlsson.track.Track
 
 internal class SqliteTrack(
     private val sqlite: Sqlite,
     private val appVersion: Long,
     private val getTimestamp: () -> Long = System::currentTimeMillis,
-    private val toRecordCursor: Cursor.() -> RecordCursor = ::DefaultRecordCursor,
-    private val toSelection: Filter<*>.() -> Selection = Filter<*>::toSelection
+    private val readOptionalRecord: Cursor.() -> Record? = Cursor::readOptionalRecord,
+    private val toRecordSequence: Cursor.() -> Sequence<Record> = Cursor::toRecordSequence
 ) : Track {
     override fun get(key: String): Record? {
-        val selections =
-            createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
-        val cursor = sqlite.query(selections, limit = 1).toRecordCursor()
-        return cursor.tryGetRecordAndClose()
+        val selections = listOf(
+            Selection(Table.COLUMN_KEY, Operator.Equals, key),
+            Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
+        )
+        return sqlite.query(selections, limit = 1) { it.readOptionalRecord() }
     }
 
-    override fun set(key: String, value: String) {
-        val selections =
-            createKeySelection(key) + Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
-        sqlite.upsert(selections, createRow(key, value, true))
+    override fun set(key: String, value: String): Boolean {
+        val selections = listOf(
+            Table.COLUMN_KEY isEqualTo key,
+            Table.COLUMN_SINGLETON isEqualTo true
+        )
+        return sqlite.upsert(selections, createRow(key, value, true))
     }
 
-    override fun query(
+    override fun <T> query(
         key: String,
-        order: Order,
-        filters: FiltersBuilder.() -> Unit
-    ): CloseableSequence<Record> {
-        val selections = createKeySelection(key) + filters.toSelections()
-        val orderBy = when (order) {
-            Order.Ascending -> OrderBy.Ascending(Table.COLUMN_ID)
-            Order.Descending -> OrderBy.Descending(Table.COLUMN_ID)
-        }
-        val cursor = sqlite.query(selections, orderBy).toRecordCursor()
-        return CloseableRecordCursorSequence(cursor)
+        selector: (Sequence<Record>) -> T
+    ): T {
+        val selections = listOf(Table.COLUMN_KEY isEqualTo key)
+        return sqlite.query(selections) { selector(it.toRecordSequence()) }
     }
 
     override fun add(key: String, value: String) {
@@ -51,23 +49,25 @@ internal class SqliteTrack(
         )
 
     override fun remove(id: Long): Boolean {
-        val selections = listOf(Selection(Table.COLUMN_ID, Operator.Equals, id))
+        val selections = listOf(Table.COLUMN_ID isEqualTo id)
         return sqlite.delete(selections) > 0
     }
 
-    override fun remove(key: String, filters: FiltersBuilder.() -> Unit): Int {
-        val selections = createKeySelection(key) + filters.toSelections()
+    override fun remove(key: String): Int {
+        val selections = listOf(Table.COLUMN_KEY isEqualTo key)
+        return sqlite.delete(selections)
+    }
+
+    override fun remove(selector: (Record) -> Boolean): Int {
+        val ids = sqlite.query(emptyList()) {
+            it.toRecordSequence()
+                .filter(selector)
+                .map(Record::id)
+                .toList()
+        }
+        val selections = listOf(Table.COLUMN_ID isIn ids)
         return sqlite.delete(selections)
     }
 
     override fun deleteDatabase() = sqlite.deleteDatabase()
-
-    private fun createKeySelection(key: String) =
-        listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
-
-    private fun (FiltersBuilder.() -> Unit).toSelections(): List<Selection> =
-        FiltersBuilder()
-            .apply(this)
-            .build()
-            .map(toSelection)
 }

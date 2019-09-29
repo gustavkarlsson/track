@@ -62,7 +62,7 @@ data class Record(
 Track every app launch and show onboarding screen first time
 
 ```kotlin
-val isFirstLaunch = Track.query("app_launched").none()
+val isFirstLaunch = Track.query("app_launched") { it.none() }
 Track.add("app_launched")
 if (isFirstLaunch) {
     showOnboardingScreen()
@@ -97,7 +97,7 @@ private fun showTosScreen() {
 Ask user to rate app if certain conditions are met
 
 ```kotlin
-val usageCount = Track.query("used_feature_x").count()
+val usageCount = Track.query("used_feature_x") { it.count() }
 val thirtyDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30)
 val ratedApp = Track.get("rated_app")
 when {

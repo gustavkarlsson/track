@@ -29,7 +29,4 @@ android {
 
 dependencies {
     implementation(project(":lib"))
-
-    implementation("androidx.appcompat:appcompat:${versions.androidAppcompat}")
-    implementation("com.google.android.material:material:${versions.androidMaterial}")
 }

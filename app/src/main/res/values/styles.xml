@@ -1,3 +1,3 @@
 <resources>
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light" />
+    <style name="AppTheme" parent="android:Theme.Light" />
 </resources>
