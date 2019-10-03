@@ -10,7 +10,12 @@ plugins {
 }
 
 scmVersion.tag.prefix = ""
-version = scmVersion.version
+
+// Enables specifying version using argument
+version = version.takeUnless { it == "unspecified" } ?: scmVersion.version
+
+// Enables specifying group using argument
+group = group.takeIf { it.toString().contains('.') } ?: "se.gustavkarlsson.track"
 
 task<DokkaTask>("dokkaJavadoc") {
     outputFormat = "javadoc"
@@ -30,7 +35,7 @@ task<Jar>("sourcesJar") {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "se.gustavkarlsson.track"
+            groupId = project.group.toString()
             artifactId = "track"
             version = project.version.toString()
             artifact(tasks["javadocJar"])
