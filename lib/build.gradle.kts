@@ -5,17 +5,8 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("org.jetbrains.dokka") version Versions.dokka
-    id("pl.allegro.tech.build.axion-release") version Versions.axionRelease
     `maven-publish`
 }
-
-scmVersion.tag.prefix = ""
-
-// Enables specifying version using argument
-version = version.takeUnless { it == "unspecified" } ?: scmVersion.version
-
-// Enables specifying group using argument
-group = group.takeIf { it.toString().contains('.') } ?: "se.gustavkarlsson.track"
 
 task<DokkaTask>("dokkaJavadoc") {
     outputFormat = "javadoc"
@@ -35,9 +26,7 @@ task<Jar>("sourcesJar") {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = project.group.toString()
             artifactId = "track"
-            version = project.version.toString()
             artifact(tasks["javadocJar"])
             artifact(tasks["sourcesJar"])
             artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
