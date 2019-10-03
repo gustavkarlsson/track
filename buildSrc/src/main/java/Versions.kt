@@ -22,5 +22,3 @@ object Versions {
     // Instrumentation Test
     val androidTest = "1.2.0"
 }
-
-val versions = Versions
