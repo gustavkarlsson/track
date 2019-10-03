@@ -21,7 +21,6 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Before
 import org.junit.Test
 import java.io.File
 
@@ -103,14 +102,9 @@ class SqliteTest {
         mockToSelectionSql,
         mockToSelectionArgSql,
         mockToContentValues,
-        mockDeleteDatabase
+        mockDeleteDatabase,
+        { mockDb }
     )
-
-    @Before
-    fun setUp() {
-        sqlite.getReadableDb = { mockDb }
-        sqlite.getWritableDb = { mockDb }
-    }
 
     @Test
     fun `create database`() {

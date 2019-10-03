@@ -5,7 +5,6 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import androidx.annotation.VisibleForTesting
 import java.io.File
 
 internal class Sqlite(
@@ -22,7 +21,9 @@ internal class Sqlite(
     private val toContentValues: Map<String, Any?>.() -> ContentValues =
         Map<String, Any?>::toContentValues,
     private val deleteDatabase: (File) -> Boolean =
-        SQLiteDatabase::deleteDatabase
+        SQLiteDatabase::deleteDatabase,
+    private val getDatabase: SQLiteOpenHelper.() -> SQLiteDatabase =
+        SQLiteOpenHelper::getWritableDatabase
 ) : SQLiteOpenHelper(
     context,
     databaseName,
@@ -38,7 +39,7 @@ internal class Sqlite(
     }
 
     fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
-        getReadableDb().use {
+        getDatabase().use {
             val cursor = it.query(
                 table,
                 null,
@@ -53,13 +54,13 @@ internal class Sqlite(
         }
 
     fun insert(row: Map<String, Any>) {
-        getWritableDb().use {
+        getDatabase().use {
             it.insertOrThrow(table, null, row.toContentValues())
         }
     }
 
     fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
-        getWritableDb().use {
+        getDatabase().use {
             it.beginTransaction()
             try {
                 val deletedCount = it.delete(
@@ -76,7 +77,7 @@ internal class Sqlite(
         }
 
     fun delete(selections: List<Selection>): Int =
-        getWritableDb().use {
+        getDatabase().use {
             it.delete(
                 table,
                 selections.toSelectionSql(),
@@ -85,18 +86,8 @@ internal class Sqlite(
         }
 
     fun deleteDatabase(): Boolean {
-        val file = getReadableDb().use { File(it.path) }
+        val file = getDatabase().use { File(it.path) }
         close()
         return deleteDatabase(file)
-    }
-
-    @VisibleForTesting
-    internal var getReadableDb: SQLiteOpenHelper.() -> SQLiteDatabase = {
-        readableDatabase
-    }
-
-    @VisibleForTesting
-    internal var getWritableDb: SQLiteOpenHelper.() -> SQLiteDatabase = {
-        writableDatabase
     }
 }
