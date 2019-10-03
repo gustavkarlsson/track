@@ -38,7 +38,7 @@ class TrackTest {
 
     @After
     fun tearDown() {
-        Track.deleteDatabase()
+        Track.clear()
     }
 
     @Test

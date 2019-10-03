@@ -169,7 +169,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `remove by selector`() {
+    fun `remove by filter`() {
         val querySequence = sequenceOf(
             record.copy(id = 1),
             record.copy(id = 7),
@@ -186,10 +186,10 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun deleteDatabase() {
+    fun clear() {
         whenever(mockSqlite.deleteDatabase()) doReturn true
 
-        val success = sqliteTrack.deleteDatabase()
+        val success = sqliteTrack.clear()
 
         assertThat(success).isTrue()
         verify(mockSqlite).deleteDatabase()

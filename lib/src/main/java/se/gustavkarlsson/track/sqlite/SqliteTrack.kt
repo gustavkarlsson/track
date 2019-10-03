@@ -58,10 +58,10 @@ internal class SqliteTrack(
         return sqlite.delete(selections)
     }
 
-    override fun remove(selector: (Record) -> Boolean): Int {
+    override fun remove(filter: (Record) -> Boolean): Int {
         val ids = sqlite.query(emptyList()) {
             it.toRecordSequence()
-                .filter(selector)
+                .filter(filter)
                 .map(Record::id)
                 .toList()
         }
@@ -69,7 +69,7 @@ internal class SqliteTrack(
         return sqlite.delete(selections)
     }
 
-    override fun deleteDatabase() = sqlite.deleteDatabase()
+    override fun clear() = sqlite.deleteDatabase()
 }
 
 private infix fun String.isEqualTo(value: Any): Selection =
