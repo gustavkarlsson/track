@@ -9,11 +9,7 @@ interface Track {
     fun get(key: String): Record?
     fun set(key: String, value: String = ""): Boolean
     fun query(key: String): List<Record> = query(key) { it.toList() }
-    fun <T> query(
-        key: String,
-        selector: (Sequence<Record>) -> T
-    ): T
-
+    fun <T> query(key: String, selector: (Sequence<Record>) -> T): T
     fun add(key: String, value: String = "")
     fun remove(id: Long): Boolean
     fun remove(key: String): Int
