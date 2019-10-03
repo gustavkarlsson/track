@@ -194,7 +194,7 @@ class SqliteTest {
         try {
             sqlite.upsert(selections, rowToInsert)
         } catch (e: Exception) {
-            //ignore
+            // ignore
         }
 
         verify(mockDb, never()).setTransactionSuccessful()

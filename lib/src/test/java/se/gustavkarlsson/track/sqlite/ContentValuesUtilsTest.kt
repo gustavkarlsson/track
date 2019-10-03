@@ -39,7 +39,7 @@ class ContentValuesUtilsTest {
         verify(mockContentValues).put("Short", 3.toShort())
         verify(mockContentValues).put("Int", 4)
         verify(mockContentValues).put("Long", 5.toLong())
-        verify(mockContentValues).put("Float",6.toFloat())
+        verify(mockContentValues).put("Float", 6.toFloat())
         verify(mockContentValues).put("Double", 7.0)
         verify(mockContentValues).put("String", "Foo")
         verify(mockContentValues).putNull("null")
