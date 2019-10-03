@@ -16,7 +16,7 @@ internal class SqliteTrack(
             Selection(Table.COLUMN_KEY, Operator.Equals, key),
             Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
         )
-        return sqlite.query(selections, limit = 1) { it.readOptionalRecord() }
+        return sqlite.query(selections, limit = 1, block = readOptionalRecord)
     }
 
     override fun set(key: String, value: String): Boolean {
