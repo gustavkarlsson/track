@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    compileSdkVersion(versions.compileSdk)
+    compileSdkVersion(Versions.compileSdk)
 
     compileOptions {
-        sourceCompatibility = versions.java
-        targetCompatibility = versions.java
+        sourceCompatibility = Versions.java
+        targetCompatibility = Versions.java
     }
 
     kotlinOptions {
-        jvmTarget = versions.jvmTarget
+        jvmTarget = Versions.jvmTarget
     }
 
     testOptions {
@@ -20,16 +20,20 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion(versions.minSdk)
+        minSdkVersion(Versions.minSdk)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}")
-    implementation("com.android.support:support-annotations:${versions.supportAnnotations}")
-    testImplementation("junit:junit:${versions.junit}")
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:${versions.assertk}")
-    testImplementation("org.mockito:mockito-core:${versions.mockito}")
-    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:${versions.mockitoKotlin}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+    implementation("com.android.support:support-annotations:${Versions.supportAnnotations}")
+
+    testImplementation("junit:junit:${Versions.junit}")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:${Versions.assertk}")
+    testImplementation("org.mockito:mockito-core:${Versions.mockito}")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoKotlin}")
+
+    androidTestImplementation("com.willowtreeapps.assertk:assertk-jvm:${Versions.assertk}")
+    androidTestImplementation("androidx.test:runner:${Versions.androidTest}")
 }

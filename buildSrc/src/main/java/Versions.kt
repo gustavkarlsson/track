@@ -18,6 +18,9 @@ object Versions {
     val assertk = "0.19"
     val mockito = "3.0.0"
     val mockitoKotlin = "2.2.0"
+
+    // Instrumentation Test
+    val androidTest = "1.2.0"
 }
 
 val versions = Versions

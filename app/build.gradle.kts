@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion(versions.compileSdk)
-    buildToolsVersion(versions.buildTools)
+    compileSdkVersion(Versions.compileSdk)
+    buildToolsVersion(Versions.buildTools)
 
     compileOptions {
-        sourceCompatibility = versions.java
-        targetCompatibility = versions.java
+        sourceCompatibility = Versions.java
+        targetCompatibility = Versions.java
     }
 
     packagingOptions {
@@ -20,8 +20,8 @@ android {
 
     defaultConfig {
         applicationId = "se.gustavkarlsson.track.demo"
-        minSdkVersion(versions.minSdk)
-        targetSdkVersion(versions.targetSdk)
+        minSdkVersion(Versions.minSdk)
+        targetSdkVersion(Versions.targetSdk)
         versionCode = 1
         versionName = "1.0.0"
     }
