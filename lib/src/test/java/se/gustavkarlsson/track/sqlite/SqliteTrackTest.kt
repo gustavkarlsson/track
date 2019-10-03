@@ -66,21 +66,22 @@ class SqliteTrackTest {
 
     @Test
     fun `get passes correct selections`() {
-        val expected = listOf(
-            Selection(Table.COLUMN_KEY, Operator.Equals, key),
-            Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
-        )
-
         sqliteTrack.get(key)
 
         val capturedSelections = argumentCaptor<List<Selection>> {
             verify(mockSqlite).query(capture(), any(), any())
         }.firstValue
+        val expected = listOf(
+            Selection(Table.COLUMN_KEY, Operator.Equals, key),
+            Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
+        )
         assertThat(capturedSelections).isEqualTo(expected)
     }
 
     @Test
     fun `set passes correct arguments`() {
+        sqliteTrack.set(key, "value")
+
         val expectedSelections = listOf(
             Selection(Table.COLUMN_KEY, Operator.Equals, key),
             Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
@@ -92,9 +93,6 @@ class SqliteTrackTest {
             Table.COLUMN_APP_VERSION to appVersion,
             Table.COLUMN_VALUE to "value"
         )
-
-        sqliteTrack.set(key, "value")
-
         verify(mockSqlite).upsert(expectedSelections, expectedRow)
     }
 
@@ -132,6 +130,69 @@ class SqliteTrackTest {
         val result = sqliteTrack.query(key) { it.count() }
 
         assertThat(result).isEqualTo(2)
+    }
+
+    @Test
+    fun add() {
+        sqliteTrack.add(key, "value")
+
+        val expectedRow = mapOf(
+            Table.COLUMN_SINGLETON to false,
+            Table.COLUMN_KEY to key,
+            Table.COLUMN_TIMESTAMP to timestamp,
+            Table.COLUMN_APP_VERSION to appVersion,
+            Table.COLUMN_VALUE to "value"
+        )
+        verify(mockSqlite).insert(expectedRow)
+    }
+
+    @Test
+    fun `remove by id`() {
+        whenever(mockSqlite.delete(any())) doReturn 1
+
+        val removed = sqliteTrack.remove(5)
+
+        assertThat(removed).isTrue()
+        val expectedSelections = listOf(Selection(Table.COLUMN_ID, Operator.Equals, 5L))
+        verify(mockSqlite).delete(expectedSelections)
+    }
+
+    @Test
+    fun `remove by key`() {
+        whenever(mockSqlite.delete(any())) doReturn 5
+
+        val removed = sqliteTrack.remove(key)
+
+        assertThat(removed).isEqualTo(5)
+        val expectedSelections = listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
+        verify(mockSqlite).delete(expectedSelections)
+    }
+
+    @Test
+    fun `remove by selector`() {
+        val querySequence = sequenceOf(
+            record.copy(id = 1),
+            record.copy(id = 7),
+            record.copy(id = 6)
+        )
+        mockQuery(mockToRecordSequence, querySequence)
+        whenever(mockSqlite.delete(any())) doReturn 2
+
+        val removed = sqliteTrack.remove { it.id > 5 }
+
+        assertThat(removed).isEqualTo(2)
+        val expectedSelections = listOf(Selection(Table.COLUMN_ID, Operator.In, listOf(7L, 6L)))
+        verify(mockSqlite).delete(expectedSelections)
+    }
+
+    @Test
+    fun deleteDatabase() {
+        whenever(mockSqlite.deleteDatabase()) doReturn true
+
+        val success = sqliteTrack.deleteDatabase()
+
+        assertThat(success).isTrue()
+        verify(mockSqlite).deleteDatabase()
     }
 
     @Suppress("UNCHECKED_CAST")
