@@ -12,7 +12,7 @@ interface Track {
     fun <T> query(
         key: String,
         selector: (Sequence<Record>) -> T
-    ): T = query(key, selector)
+    ): T
 
     fun add(key: String, value: String = "")
     fun remove(id: Long): Boolean

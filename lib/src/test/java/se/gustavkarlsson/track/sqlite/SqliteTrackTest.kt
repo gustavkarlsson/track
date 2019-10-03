@@ -2,10 +2,15 @@ package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
 import assertk.assertThat
+import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isNull
+import assertk.assertions.isTrue
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -13,6 +18,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Test
 import se.gustavkarlsson.track.Record
 
+private typealias Selector<T> = Cursor.() -> T
 private typealias ReadOptionalRecord = Cursor.() -> Record?
 private typealias ToRecordSequence = Cursor.() -> Sequence<Record>
 
@@ -42,7 +48,7 @@ class SqliteTrackTest {
 
     @Test
     fun `get no record`() {
-        mockQuery<Record?>(null)
+        mockQuery(mockReadOptionalRecord, null)
 
         val result = sqliteTrack.get(key)
 
@@ -51,7 +57,7 @@ class SqliteTrackTest {
 
     @Test
     fun `get existing record`() {
-        mockQuery(record)
+        mockQuery(mockReadOptionalRecord, record)
 
         val result = sqliteTrack.get(key)
 
@@ -73,7 +79,68 @@ class SqliteTrackTest {
         assertThat(capturedSelections).isEqualTo(expected)
     }
 
-    private inline fun <reified T> mockQuery(returnValue: T) {
-        whenever(mockSqlite.query(any(), any(), any<(Cursor) -> T>())) doReturn returnValue
+    @Test
+    fun `set passes correct arguments`() {
+        val expectedSelections = listOf(
+            Selection(Table.COLUMN_KEY, Operator.Equals, key),
+            Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
+        )
+        val expectedRow = mapOf(
+            Table.COLUMN_SINGLETON to true,
+            Table.COLUMN_KEY to key,
+            Table.COLUMN_TIMESTAMP to timestamp,
+            Table.COLUMN_APP_VERSION to appVersion,
+            Table.COLUMN_VALUE to "value"
+        )
+
+        sqliteTrack.set(key, "value")
+
+        verify(mockSqlite).upsert(expectedSelections, expectedRow)
+    }
+
+    @Test
+    fun `set with existing replaced`() {
+        whenever(mockSqlite.upsert(any(), any())) doReturn true
+
+        val replaced = sqliteTrack.set(key)
+
+        assertThat(replaced).isTrue()
+    }
+
+    @Test
+    fun `set with existing not replaced`() {
+        whenever(mockSqlite.upsert(any(), any())) doReturn false
+
+        val replaced = sqliteTrack.set(key)
+
+        assertThat(replaced).isFalse()
+    }
+
+    @Test
+    fun `query to list returns correct value`() {
+        mockQuery(mockToRecordSequence, sequenceOf(record))
+
+        val result = sqliteTrack.query(key)
+
+        assertThat(result).containsExactly(record)
+    }
+
+    @Test
+    fun `query with selector returns correct value`() {
+        mockQuery(mockToRecordSequence, sequenceOf(record, record))
+
+        val result = sqliteTrack.query(key) { it.count() }
+
+        assertThat(result).isEqualTo(2)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private inline fun <reified T> mockQuery(block: Selector<T>, returnValue: T) {
+        val mockCursor = mock<Cursor>()
+        whenever(block.invoke(mockCursor)) doReturn returnValue
+        whenever(mockSqlite.query(any(), anyOrNull(), any<Selector<T>>())) doAnswer {
+            val function = it.arguments[2] as Selector<T>
+            function(mockCursor)
+        }
     }
 }
