@@ -20,3 +20,7 @@ allprojects {
         google()
     }
 }
+
+plugins {
+    base
+}
