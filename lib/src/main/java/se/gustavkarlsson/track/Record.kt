@@ -21,24 +21,20 @@ data class Record(
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(id)
-        parcel.writeString(key)
-        parcel.writeLong(timestamp)
-        parcel.writeLong(appVersion)
-        parcel.writeString(value)
+        parcel.apply {
+            writeLong(id)
+            writeString(key)
+            writeLong(timestamp)
+            writeLong(appVersion)
+            writeString(value)
+        }
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents() = 0
 
     internal companion object CREATOR : Parcelable.Creator<Record> {
-        override fun createFromParcel(parcel: Parcel): Record {
-            return Record(parcel)
-        }
+        override fun createFromParcel(parcel: Parcel) = Record(parcel)
 
-        override fun newArray(size: Int): Array<Record?> {
-            return arrayOfNulls(size)
-        }
+        override fun newArray(size: Int): Array<Record?> = arrayOfNulls(size)
     }
 }
