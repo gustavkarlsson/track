@@ -20,7 +20,7 @@ import org.junit.Test
 import se.gustavkarlsson.track.sqlite.Database
 
 @MediumTest
-class LogHistoryAndroidUnitTest {
+class TrackTest {
 
     private val key = "key"
     private val value = "value"
