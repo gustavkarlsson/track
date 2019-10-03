@@ -12,6 +12,7 @@ object Versions {
     val supportAnnotations = "28.0.0"
     val androidGradle = "3.5.0"
     val axionRelease = "1.10.2"
+    val dokka = "0.9.18"
 
     // Test
     val junit = "4.12"

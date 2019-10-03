@@ -1,6 +1,43 @@
+import org.gradle.jvm.tasks.Jar
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     id("com.android.library")
     id("kotlin-android")
+    id("org.jetbrains.dokka") version Versions.dokka
+    id("pl.allegro.tech.build.axion-release") version Versions.axionRelease
+    `maven-publish`
+}
+
+scmVersion.tag.prefix = ""
+version = scmVersion.version
+
+task<DokkaTask>("dokkaJavadoc") {
+    outputFormat = "javadoc"
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task<Jar>("javadocJar") {
+    from((tasks["dokkaJavadoc"] as DokkaTask).outputDirectory)
+    archiveClassifier.set("javadoc")
+}
+
+task<Jar>("sourcesJar") {
+    from(android.sourceSets["main"].java.srcDirs)
+    archiveClassifier.set("sources")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "se.gustavkarlsson.track"
+            artifactId = "track"
+            version = project.version.toString()
+            artifact(tasks["javadocJar"])
+            artifact(tasks["sourcesJar"])
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+        }
+    }
 }
 
 android {
@@ -26,7 +63,7 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+    implementation(kotlin("stdlib", version = Versions.kotlin))
     implementation("com.android.support:support-annotations:${Versions.supportAnnotations}")
 
     testImplementation("junit:junit:${Versions.junit}")
