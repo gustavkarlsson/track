@@ -15,6 +15,10 @@ android {
         jvmTarget = versions.jvmTarget
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     defaultConfig {
         minSdkVersion(versions.minSdk)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

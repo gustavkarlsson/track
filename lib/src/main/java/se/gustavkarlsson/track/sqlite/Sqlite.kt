@@ -20,7 +20,9 @@ internal class Sqlite(
     private val toSelectionArgSql: List<Selection>.() -> Array<String> =
         List<Selection>::toSelectionArgSql,
     private val toContentValues: Map<String, Any?>.() -> ContentValues =
-        Map<String, Any?>::toContentValues
+        Map<String, Any?>::toContentValues,
+    private val deleteDatabase: (File) -> Boolean =
+        SQLiteDatabase::deleteDatabase
 ) : SQLiteOpenHelper(
     context,
     databaseName,
@@ -56,8 +58,8 @@ internal class Sqlite(
         }
     }
 
-    fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean {
-        return getWritableDb().use {
+    fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
+        getWritableDb().use {
             it.beginTransaction()
             try {
                 val deletedCount = it.delete(
@@ -72,7 +74,6 @@ internal class Sqlite(
                 it.endTransaction()
             }
         }
-    }
 
     fun delete(selections: List<Selection>): Int =
         getWritableDb().use {
@@ -86,7 +87,7 @@ internal class Sqlite(
     fun deleteDatabase(): Boolean {
         val file = getReadableDb().use { File(it.path) }
         close()
-        return SQLiteDatabase.deleteDatabase(file)
+        return deleteDatabase(file)
     }
 
     @VisibleForTesting
