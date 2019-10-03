@@ -40,7 +40,9 @@ publishing {
             version = project.version.toString()
             artifact(tasks["javadocJar"])
             artifact(tasks["sourcesJar"])
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
+                builtBy(tasks["assemble"])
+            }
         }
     }
 }
