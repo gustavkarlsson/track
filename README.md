@@ -1,6 +1,6 @@
 # Track
 
-Simple on-device event tracking and querying for Android
+Simple on-device event tracking and querying for Android.
 
 ---
 
@@ -12,36 +12,35 @@ Initialize in Application `onCreate`
 Track.initialize(this)
 ```
 
-Track events using a single variable with `set`
+Track a single event (overwriting any previous value) with `set`
 
 ```kotlin
-Track.set("used_feature_x", "value")
+Track.set("show_intro", "false")
 ```
 
-... or track multiple events per key with `add`
+Read it back with `get`
 
 ```kotlin
-Track.add("used_feature_x", "value")
+val record: Record = Track.get("show_intro")
 ```
 
-Read a single variable record back with `get`
+Track multiple events per key with `add`
 
 ```kotlin
-val record = Track.get("used_feature_x")
+Track.add("note_added", "buy milk")
 ```
 
-... or use a `query` for multiple events
+And use `query` to find all records of that key
 
 ```kotlin
-val recordSequence = Track.query("used_feature_x")
+val records: List<Record> = Track.query("note_added")
 ```
 
-You can also do more advanced queries
+You don't have to read all query results into memory
 
 ```kotlin
-val recordSequence = Track.query("used_feature_x", order = Order.Descending) {
-    appVersion isGreaterThan 12
-    value isNotEqualTo "forbidden"
+val recordsAboutEggs = Track.query("note_added") { records: Sequence<Record> ->
+    records.filter { it.value.contains("eggs") }
 }
 ```
 
