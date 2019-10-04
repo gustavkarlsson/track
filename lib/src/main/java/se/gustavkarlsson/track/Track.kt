@@ -27,11 +27,10 @@ interface Track {
     fun query(key: String): List<Record> = query(key) { it.toList() }
 
     /**
-     * Gets a sequence all records for [key] and invokes [selector] on the resulting sequence,
+     * Creates a sequence of all records for [key] and invokes [selector] on the resulting sequence,
      * yielding a return value.
      *
-     * **Caution:** Do not leak references to the sequence as it's backing data source may
-     * not be available after this function returns.
+     * The sequence may only be iterated once, and may not be used after this function returns.
      */
     fun <T> query(key: String, selector: (Sequence<Record>) -> T): T
 
@@ -41,8 +40,7 @@ interface Track {
     fun add(key: String, value: String = "")
 
     /**
-     * Removes the record matching [id] if it exists.
-     * Returns `true` if any record was removed, otherwise `false`.
+     * Removes the record matching [id] if it exists. Returns `true` if any record was removed, otherwise `false`.
      */
     fun remove(id: Long): Boolean
 
@@ -57,8 +55,7 @@ interface Track {
     fun remove(filter: (Record) -> Boolean): Int
 
     /**
-     * Clears all records and closes any underlying resources.
-     * Returns `true` if successful, otherwise `false`.
+     * Clears all records and closes any underlying resources. Returns `true` if successful, otherwise `false`.
      */
     fun clear(): Boolean
 

@@ -32,7 +32,14 @@ internal class SqliteTrack(
         selector: (Sequence<Record>) -> T
     ): T {
         val selections = listOf(Table.COLUMN_KEY isEqualTo key)
-        return sqlite.query(selections) { selector(it.toRecordSequence()) }
+        return sqlite.query(selections) { cursor ->
+            val recordSequence = cursor.toRecordSequence()
+            val selected = selector(recordSequence)
+            require(selected !== recordSequence) {
+                "May not return this record sequence directly. Try toList()"
+            }
+            selected
+        }
     }
 
     override fun add(key: String, value: String) {

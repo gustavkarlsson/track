@@ -27,6 +27,13 @@ class CursorUtilsTest {
         on(it.getColumnIndexOrThrow(Table.COLUMN_VALUE)) doReturn 4
     }
 
+    @Test(expected = IllegalStateException::class)
+    fun `toRecordSequence may not be iterated twice`() {
+        val sequence = mockCursor.toRecordSequence()
+        sequence.count()
+        sequence.count()
+    }
+
     @Test
     fun `toRecordSequence no rows`() {
         val sequence = mockCursor.toRecordSequence()

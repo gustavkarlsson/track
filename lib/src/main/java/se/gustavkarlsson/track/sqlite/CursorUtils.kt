@@ -7,7 +7,7 @@ internal fun Cursor.toRecordSequence(): Sequence<Record> =
     sequence {
         while (moveToNext())
             yield(readExistingRecord())
-    }
+    }.constrainOnce()
 
 internal fun Cursor.readOptionalRecord(): Record? =
     if (moveToNext())
