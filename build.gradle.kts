@@ -1,4 +1,4 @@
-import org.gradle.kotlin.dsl.repositories
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 buildscript {
     repositories {
@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:${Versions.androidGradle}")
         classpath(kotlin("gradle-plugin", version = Versions.kotlin))
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:${Versions.ktlint}")
     }
 }
 
@@ -17,6 +18,14 @@ allprojects {
         jcenter()
         mavenCentral()
         google()
+    }
+}
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    extensions.getByType(typeOf<KtlintExtension>()).apply {
+        android.set(true)
     }
 }
 
