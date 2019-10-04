@@ -25,6 +25,7 @@ private fun Cursor.readExistingRecord(): Record = Record(
 
 private inline operator fun <reified T> Cursor.get(column: String): T {
     val index = getColumnIndexOrThrow(column)
+    if (null is T && isNull(index)) return null as T
     return when (T::class) {
         Boolean::class -> getInt(index) != 0
         ByteArray::class -> getBlob(index)
