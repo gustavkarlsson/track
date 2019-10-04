@@ -1,4 +1,4 @@
-![](https://github.com/gustavkarlsson/track/workflows/Build/badge.svg)
+[![Build](https://github.com/gustavkarlsson/track/workflows/Build/badge.svg)](https://github.com/gustavkarlsson/track/actions)
 [![Version](https://jitpack.io/v/gustavkarlsson/track.svg)](https://jitpack.io/#gustavkarlsson/track)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gustavkarlsson/track/blob/master/LICENSE.md)
 
@@ -91,7 +91,7 @@ private fun showTosScreen() {
             Track.set("accepted_tos")
         }
         .setNegativeButton("Close app") { _, _ ->
-            exitProcess(1)
+            exitProcess(0)
         }
         .show()
 }
