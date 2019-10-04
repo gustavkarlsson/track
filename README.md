@@ -1,12 +1,14 @@
+![](https://github.com/gustavkarlsson/track/workflows/Build/badge.svg)
+[![Version](https://jitpack.io/v/gustavkarlsson/track.svg)](https://jitpack.io/#gustavkarlsson/track)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gustavkarlsson/track/blob/master/LICENSE.md)
+
 # Track
 
 Simple on-device event tracking and querying for Android.
 
----
-
 ## Usage
 
-Initialize in Application `onCreate`
+Initialize in `Application.onCreate`
 
 ```kotlin
 Track.initialize(this)
@@ -18,30 +20,10 @@ Track a single event (overwriting any previous value) with `set`
 Track.set("show_intro", "false")
 ```
 
-Read it back with `get`
+Read it back as a record with `get`
 
 ```kotlin
-val record: Record = Track.get("show_intro")
-```
-
-Track multiple events per key with `add`
-
-```kotlin
-Track.add("note_added", "buy milk")
-```
-
-And use `query` to find all records of that key
-
-```kotlin
-val records: List<Record> = Track.query("note_added")
-```
-
-You don't have to read all query results into memory
-
-```kotlin
-val recordsAboutEggs = Track.query("note_added") { records: Sequence<Record> ->
-    records.filter { it.value.contains("eggs") }
-}
+val record = Track.get("show_intro")
 ```
 
 Records look like this:
@@ -56,6 +38,29 @@ data class Record(
 )
 ```
 
+Track multiple events per key with `add`
+
+```kotlin
+Track.add("note_added", "buy milk")
+```
+
+And use `query` to find all records of any given key
+
+```kotlin
+val records = Track.query("note_added")
+```
+
+You don't have to read all query results into memory
+
+```kotlin
+val firstFiveRecordsAboutEggs = Track.query("note_added") { records ->
+    records
+        .filter { it.value.contains("eggs") }
+        .take(5)
+        .toList() // Consume the sequence before returning
+}
+```
+
 ## Some use cases
 
 Track every app launch and show onboarding screen first time
@@ -64,7 +69,7 @@ Track every app launch and show onboarding screen first time
 val isFirstLaunch = Track.query("app_launched") { it.none() }
 Track.add("app_launched")
 if (isFirstLaunch) {
-    showOnboardingScreen()
+    // Show onboarding screen
 }
 ```
 
@@ -126,5 +131,25 @@ private fun showRatingScreen() {
             Track.set("rated_app", "later")
         }
         .show()
+}
+```
+
+## Download
+
+Track is hosted on JitPack. Here's how you include it in your gradle project:
+
+**Step 1.** Add the JitPack repository to your `build.gradle` file:
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+```
+
+**Step 2.** Add the dependency:
+
+```groovy
+dependencies {
+    implementation 'com.github.gustavkarlsson:track:<latest_version>'
 }
 ```

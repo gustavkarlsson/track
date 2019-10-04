@@ -141,4 +141,35 @@ class TrackTest {
             assertThat(queried.map(Record::id)).each { it.isGreaterThan(10) }
         }
     }
+
+    @Test
+    fun noReusedIds() {
+        Track.add(key)
+        Track.add(key)
+        Track.add(key)
+        Track.remove(key)
+        Track.add(key)
+
+        val lastId = Track.query(key).last().id
+
+        assertThat(lastId).isGreaterThan(2)
+    }
+
+    @Test
+    fun idsAlwaysIncrementing() {
+        Track.add(key, "1")
+        Track.add(key, "2")
+        Track.add(key, "3")
+        Track.remove(2)
+        Track.add(key, "4")
+        Track.remove(1)
+        Track.add(key, "5")
+        Track.add(key, "6")
+
+        val allIdsIncrementing = Track.query(key)
+            .zipWithNext { prev, curr -> curr.id > prev.id }
+            .all { it }
+
+        assertThat(allIdsIncrementing).isTrue()
+    }
 }
