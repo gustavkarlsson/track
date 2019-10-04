@@ -21,8 +21,8 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Test
 import java.io.File
+import org.junit.Test
 
 private typealias ToSelectionSql = List<Selection>.() -> String?
 private typealias ToSelectionArgSql = List<Selection>.() -> Array<String>
