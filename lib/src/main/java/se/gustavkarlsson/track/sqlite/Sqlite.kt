@@ -30,9 +30,7 @@ internal class Sqlite(
     null,
     databaseVersion
 ) {
-    override fun onCreate(db: SQLiteDatabase) {
-        createStatements.forEach(db::execSQL)
-    }
+    override fun onCreate(db: SQLiteDatabase) = createStatements.forEach(db::execSQL)
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         error("DB upgrade not configured from version $oldVersion-$newVersion")

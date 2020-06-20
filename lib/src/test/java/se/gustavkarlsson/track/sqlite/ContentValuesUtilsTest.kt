@@ -1,20 +1,11 @@
 package se.gustavkarlsson.track.sqlite
 
-import android.content.ContentValues
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import org.junit.Before
 import org.junit.Test
 
 class ContentValuesUtilsTest {
-
-    private val mockContentValues = mock<ContentValues>()
-
-    @Before
-    fun setUp() {
-        constructor = { mockContentValues }
-    }
 
     @Test
     fun `toContentValues with all supported data types`() {
@@ -31,25 +22,25 @@ class ContentValuesUtilsTest {
             "null" to null
         )
 
-        map.toContentValues()
+        val contentValues = map.toContentValues { mock() }
 
-        verify(mockContentValues).put("Boolean", true)
-        verify(mockContentValues).put("ByteArray", byteArrayOf(1))
-        verify(mockContentValues).put("Byte", 2.toByte())
-        verify(mockContentValues).put("Short", 3.toShort())
-        verify(mockContentValues).put("Int", 4)
-        verify(mockContentValues).put("Long", 5.toLong())
-        verify(mockContentValues).put("Float", 6.toFloat())
-        verify(mockContentValues).put("Double", 7.0)
-        verify(mockContentValues).put("String", "Foo")
-        verify(mockContentValues).putNull("null")
-        verifyNoMoreInteractions(mockContentValues)
+        verify(contentValues).put("Boolean", true)
+        verify(contentValues).put("ByteArray", byteArrayOf(1))
+        verify(contentValues).put("Byte", 2.toByte())
+        verify(contentValues).put("Short", 3.toShort())
+        verify(contentValues).put("Int", 4)
+        verify(contentValues).put("Long", 5.toLong())
+        verify(contentValues).put("Float", 6.toFloat())
+        verify(contentValues).put("Double", 7.0)
+        verify(contentValues).put("String", "Foo")
+        verify(contentValues).putNull("null")
+        verifyNoMoreInteractions(contentValues)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `toContentValues with unsupported type`() {
         val map = mapOf("foo" to emptyList<String>())
 
-        map.toContentValues()
+        map.toContentValues { mock() }
     }
 }

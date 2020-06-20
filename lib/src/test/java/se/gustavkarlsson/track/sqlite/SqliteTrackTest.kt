@@ -123,7 +123,7 @@ class SqliteTrackTest {
         assertThat(result).containsExactly(record)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = IllegalStateException::class)
     fun `query with selector may not return same sequence`() {
         mockQuery(mockToRecordSequence, emptySequence())
 

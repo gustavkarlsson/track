@@ -13,8 +13,8 @@ internal class SqliteTrack(
 ) : Track {
     override fun get(key: String): Record? {
         val selections = listOf(
-            Selection(Table.COLUMN_KEY, Operator.Equals, key),
-            Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
+            Table.COLUMN_KEY isEqualTo key,
+            Table.COLUMN_SINGLETON isEqualTo true
         )
         return sqlite.query(selections, limit = 1, block = readOptionalRecord)
     }
@@ -35,16 +35,14 @@ internal class SqliteTrack(
         return sqlite.query(selections) { cursor ->
             val recordSequence = cursor.toRecordSequence()
             val selected = selector(recordSequence)
-            require(selected !== recordSequence) {
-                "May not return this record sequence directly. Try toList()"
+            check(selected !== recordSequence) {
+                "May not return this record sequence directly as it will be closed. Try toList()"
             }
             selected
         }
     }
 
-    override fun add(key: String, value: String) {
-        sqlite.insert(createRow(key, value, false))
-    }
+    override fun add(key: String, value: String) = sqlite.insert(createRow(key, value, false))
 
     private fun createRow(key: String, value: String, singleton: Boolean): Map<String, Any> =
         mapOf(
