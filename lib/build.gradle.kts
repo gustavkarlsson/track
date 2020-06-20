@@ -4,6 +4,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
     id("com.android.library")
     id("kotlin-android")
+    id("kotlin-android-extensions")
     id("org.jetbrains.dokka") version Versions.dokka
     `maven-publish`
 }
