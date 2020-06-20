@@ -57,6 +57,10 @@ android {
         minSdkVersion(Versions.minSdk)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    lintOptions {
+        baseline("lint-baseline.xml")
+    }
 }
 
 dependencies {
