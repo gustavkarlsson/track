@@ -74,5 +74,4 @@ dependencies {
 
     androidTestImplementation("io.strikt:strikt-core:${Versions.strikt}")
     androidTestImplementation("androidx.test:runner:${Versions.androidTest}")
-
 }
