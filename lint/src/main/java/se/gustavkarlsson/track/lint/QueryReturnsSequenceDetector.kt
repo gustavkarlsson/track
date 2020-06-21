@@ -12,8 +12,8 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiParameter
-import org.jetbrains.uast.UCallExpression
 import java.util.EnumSet
+import org.jetbrains.uast.UCallExpression
 
 // TODO some of these checks could certainly be more accurate
 internal class QueryReturnsSequenceDetector : Detector(), SourceCodeScanner {
@@ -26,7 +26,8 @@ internal class QueryReturnsSequenceDetector : Detector(), SourceCodeScanner {
         if (!method.hasTypeParameters()) return
         if (method.parameters.size != 2) return
         if ((method.parameters[0] as? PsiParameter)?.type?.canonicalText != "java.lang.String") return
-        if ((method.parameters[1] as? PsiParameter)?.type?.canonicalText != "kotlin.jvm.functions.Function1<? super kotlin.sequences.Sequence<se.gustavkarlsson.track.Record>,? extends T>") return
+        if ((method.parameters[1] as? PsiParameter)?.type?.canonicalText
+                ?.startsWith("kotlin.jvm.functions.Function") == false) return
         if (method.typeParameters.size != 1) return
         if (node.returnType?.canonicalText?.startsWith("kotlin.sequences") == false) return
         reportIssue(context, node)

@@ -20,4 +20,3 @@ dependencies {
     testImplementation("com.android.tools.lint:lint-tests:${Versions.lint}")
     testImplementation("junit:junit:${Versions.junit}")
 }
-
