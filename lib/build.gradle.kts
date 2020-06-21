@@ -68,10 +68,11 @@ dependencies {
     implementation("com.android.support:support-annotations:${Versions.supportAnnotations}")
 
     testImplementation("junit:junit:${Versions.junit}")
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:${Versions.assertk}")
+    testImplementation("io.strikt:strikt-core:${Versions.strikt}")
     testImplementation("org.mockito:mockito-core:${Versions.mockito}")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoKotlin}")
 
-    androidTestImplementation("com.willowtreeapps.assertk:assertk-jvm:${Versions.assertk}")
+    androidTestImplementation("io.strikt:strikt-core:${Versions.strikt}")
     androidTestImplementation("androidx.test:runner:${Versions.androidTest}")
+
 }

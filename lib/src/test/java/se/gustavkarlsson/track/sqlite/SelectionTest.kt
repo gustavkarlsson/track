@@ -1,10 +1,9 @@
 package se.gustavkarlsson.track.sqlite
 
-import assertk.assertAll
-import assertk.assertThat
-import assertk.assertions.containsExactly
-import assertk.assertions.isEqualTo
 import org.junit.Test
+import strikt.api.expect
+import strikt.assertions.containsExactly
+import strikt.assertions.isEqualTo
 
 class SelectionTest {
 
@@ -92,8 +91,8 @@ private fun List<Selection>.assert(expectedSql: String?, vararg expectedArgs: St
     val sql = toSelectionSql()
     val args = toSelectionArgSql()
 
-    assertAll {
-        assertThat(sql, "expectedSql").isEqualTo(expectedSql)
-        assertThat(args, "expectedArgs").containsExactly(*expectedArgs)
+    expect {
+        that(sql).describedAs("sql").isEqualTo(expectedSql)
+        that(args.toList()).describedAs("args").containsExactly(*expectedArgs)
     }
 }

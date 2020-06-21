@@ -1,26 +1,34 @@
 package se.gustavkarlsson.track
 
+import android.content.Context
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
-import assertk.assertAll
-import assertk.assertThat
-import assertk.assertions.each
-import assertk.assertions.hasSize
-import assertk.assertions.isEmpty
-import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
-import assertk.assertions.isGreaterThan
-import assertk.assertions.isNotNull
-import assertk.assertions.isNull
-import assertk.assertions.isTrue
-import assertk.fail
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import se.gustavkarlsson.track.sqlite.Database
+import strikt.api.Assertion
+import strikt.api.expect
+import strikt.api.expectThat
+import strikt.assertions.all
+import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.exists
+import strikt.assertions.hasSize
+import strikt.assertions.isEmpty
+import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isGreaterThan
+import strikt.assertions.isNotNull
+import strikt.assertions.isNull
+import strikt.assertions.isTrue
+import strikt.assertions.map
+import java.nio.file.Files
+import java.nio.file.Path
 
 @MediumTest
 class TrackTest {
+    private lateinit var context: Context
+    private lateinit var databasePath: Path
 
     private val key = "key"
     private val value = "value"
@@ -28,17 +36,15 @@ class TrackTest {
 
     @Before
     fun setUp() {
-        val context = InstrumentationRegistry.getInstrumentation().context
-        val database = context.getDatabasePath(Database.NAME)
-        if (database.exists() && !database.delete()) {
-            fail("Could not delete existing database $database")
-        }
+        context = InstrumentationRegistry.getInstrumentation().context
+        databasePath = context.getDatabasePath(Database.NAME).toPath()
+        Files.deleteIfExists(databasePath)
         Track.initialize(context)
     }
 
     @After
     fun tearDown() {
-        Track.clear()
+        Files.deleteIfExists(databasePath)
     }
 
     @Test
@@ -46,10 +52,12 @@ class TrackTest {
         val replaced = Track.set(key, value)
         val record = Track.get(key)
 
-        assertAll {
-            assertThat(replaced).isFalse()
-            assertThat(record).isNotNull()
-            assertThat(record!!.value).isEqualTo(value)
+        expect {
+            that(replaced).describedAs("replaced").isFalse()
+            that(record).describedAs("record")
+                .isNotNull()
+                .get(Record::value)
+                .isEqualTo(value)
         }
     }
 
@@ -59,9 +67,12 @@ class TrackTest {
         val replaced = Track.set(key, otherValue)
         val record = Track.get(key)
 
-        assertAll {
-            assertThat(replaced).isTrue()
-            assertThat(record!!.value).isEqualTo(otherValue)
+        expect {
+            that(replaced).describedAs("replaced").isTrue()
+            that(record).describedAs("record")
+                .isNotNull()
+                .get(Record::value)
+                .isEqualTo(otherValue)
         }
     }
 
@@ -71,9 +82,9 @@ class TrackTest {
         val replaced = Track.set(key, otherValue)
         val count = Track.query(key).count()
 
-        assertAll {
-            assertThat(replaced).isFalse()
-            assertThat(count).isEqualTo(2)
+        expect {
+            that(replaced).describedAs("replaced").isFalse()
+            that(count).describedAs("count").isEqualTo(2)
         }
     }
 
@@ -82,7 +93,7 @@ class TrackTest {
         Track.add(key, value)
         val record = Track.get(key)
 
-        assertThat(record).isNull()
+        expectThat(record).describedAs("record").isNull()
     }
 
     @Test
@@ -93,8 +104,9 @@ class TrackTest {
 
         val records = Track.query(key)
 
-        val actualValues = records.map(Record::value).toSet()
-        assertThat(actualValues).isEqualTo(values + "foobar")
+        expectThat(records).describedAs("records")
+            .map(Record::value)
+            .containsExactlyInAnyOrder(values + "foobar")
     }
 
     @Test
@@ -103,11 +115,11 @@ class TrackTest {
 
         val record = Track.get(key)
         val removed = Track.remove(record!!.id)
-        val queried = Track.query(key)
+        val queriedRecords = Track.query(key)
 
-        assertAll {
-            assertThat(removed).isTrue()
-            assertThat(queried).isEmpty()
+        expect {
+            that(removed).describedAs("removed").isTrue()
+            that(queriedRecords).describedAs("queried records").isEmpty()
         }
     }
 
@@ -120,9 +132,9 @@ class TrackTest {
         val removed = Track.remove(key)
         val queried = Track.query(key)
 
-        assertAll {
-            assertThat(removed).isEqualTo(values.count() + 1)
-            assertThat(queried).isEmpty()
+        expect {
+            that(removed).describedAs("removed").isEqualTo(values.count() + 1)
+            that(queried).describedAs("queried records").isEmpty()
         }
     }
 
@@ -135,10 +147,10 @@ class TrackTest {
         }
         val queried = Track.query(key)
 
-        assertAll {
-            assertThat(removed).isEqualTo(10)
-            assertThat(queried).hasSize(16)
-            assertThat(queried.map(Record::id)).each { it.isGreaterThan(10) }
+        expect {
+            that(removed).describedAs("removed count").isEqualTo(10)
+            that(queried).describedAs("queried records").hasSize(16)
+            that(queried).describedAs("queried record ID:s").map(Record::id).all { isGreaterThan(10L) }
         }
     }
 
@@ -152,7 +164,7 @@ class TrackTest {
 
         val lastId = Track.query(key).last().id
 
-        assertThat(lastId).isGreaterThan(2)
+        expectThat(lastId).describedAs("last ID").isGreaterThan(2L)
     }
 
     @Test
@@ -170,6 +182,22 @@ class TrackTest {
             .zipWithNext { prev, curr -> curr.id > prev.id }
             .all { it }
 
-        assertThat(allIdsIncrementing).isTrue()
+        expectThat(allIdsIncrementing).describedAs("ID's increment").isTrue()
+    }
+
+    @Test
+    fun settingValueCreatesDatabase() {
+        Track.set(key)
+        expectThat(databasePath).exists()
+    }
+
+    @Test
+    fun clearDeletesDatabase() {
+        Track.set(key)
+        Track.clear()
+        expectThat(databasePath).doesNotExist()
     }
 }
+
+private fun <T : Path> Assertion.Builder<T>.doesNotExist(): Assertion.Builder<T> =
+    assertThat("does not exist") { !Files.exists(it) }

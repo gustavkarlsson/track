@@ -1,17 +1,18 @@
 package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
-import assertk.assertThat
-import assertk.assertions.containsExactly
-import assertk.assertions.isEmpty
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNull
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doReturnConsecutively
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Test
 import se.gustavkarlsson.track.Record
+import strikt.api.expectThat
+import strikt.api.expectThrows
+import strikt.assertions.containsExactly
+import strikt.assertions.isEmpty
+import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 
 class CursorUtilsTest {
 
@@ -27,18 +28,18 @@ class CursorUtilsTest {
         on(it.getColumnIndexOrThrow(Table.COLUMN_VALUE)) doReturn 4
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun `toRecordSequence may not be iterated twice`() {
         val sequence = mockCursor.toRecordSequence()
         sequence.count()
-        sequence.count()
+        expectThrows<IllegalStateException> { sequence.count() }
     }
 
     @Test
     fun `toRecordSequence no rows`() {
         val sequence = mockCursor.toRecordSequence()
 
-        assertThat(sequence.toList(), "sequence").isEmpty()
+        expectThat(sequence.toList()).describedAs("sequence").isEmpty()
     }
 
     @Test
@@ -47,7 +48,7 @@ class CursorUtilsTest {
 
         val sequence = mockCursor.toRecordSequence()
 
-        assertThat(sequence.toList(), "sequence").containsExactly(stubRecord1)
+        expectThat(sequence.toList()).describedAs("sequence").containsExactly(stubRecord1)
     }
 
     @Test
@@ -56,14 +57,14 @@ class CursorUtilsTest {
 
         val sequence = mockCursor.toRecordSequence()
 
-        assertThat(sequence.toList(), "sequence").containsExactly(stubRecord1, stubRecord2)
+        expectThat(sequence.toList()).describedAs("sequence").containsExactly(stubRecord1, stubRecord2)
     }
 
     @Test
     fun `readOptionalRecord with no rows`() {
         val record = mockCursor.readOptionalRecord()
 
-        assertThat(record, "record").isNull()
+        expectThat(record).describedAs("record").isNull()
     }
 
     @Test
@@ -72,7 +73,7 @@ class CursorUtilsTest {
 
         val record = mockCursor.readOptionalRecord()
 
-        assertThat(record, "record").isEqualTo(stubRecord1)
+        expectThat(record).describedAs("record").isEqualTo(stubRecord1)
     }
 
     @Test
@@ -81,7 +82,7 @@ class CursorUtilsTest {
 
         val record = mockCursor.readOptionalRecord()
 
-        assertThat(record, "record").isEqualTo(stubRecord1)
+        expectThat(record).describedAs("record").isEqualTo(stubRecord1)
     }
 }
 

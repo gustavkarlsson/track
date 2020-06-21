@@ -4,12 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
-import assertk.assertions.isNotNull
-import assertk.assertions.isTrue
-import assertk.assertions.isZero
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyArray
 import com.nhaarman.mockitokotlin2.anyOrNull
@@ -23,6 +17,10 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import org.junit.Test
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 private typealias ToSelectionSql = List<Selection>.() -> String?
 private typealias ToSelectionArgSql = List<Selection>.() -> Array<String>
@@ -126,11 +124,8 @@ class SqliteTest {
     fun `query no selection`() {
         val selections = emptyList<Selection>()
 
-        val result = sqlite.query(selections) {
-            it.toString()
-        }
+        sqlite.query(selections) { }
 
-        assertThat(result).isNotNull()
         verify(mockDb).query(
             tableName,
             null,
@@ -146,11 +141,8 @@ class SqliteTest {
 
     @Test
     fun `query with selection and limit`() {
-        val result = sqlite.query(selections, 5) {
-            it.toString()
-        }
+        sqlite.query(selections, 5) { }
 
-        assertThat(result).isNotNull()
         verify(mockDb).query(
             tableName,
             null,
@@ -206,7 +198,7 @@ class SqliteTest {
     fun `upsert with no existing row returns true`() {
         val replaced = sqlite.upsert(selections, rowToInsert)
 
-        assertThat(replaced).isFalse()
+        expectThat(replaced).describedAs("replaced").isFalse()
     }
 
     @Test
@@ -215,7 +207,7 @@ class SqliteTest {
 
         val replaced = sqlite.upsert(selections, rowToInsert)
 
-        assertThat(replaced).isTrue()
+        expectThat(replaced).describedAs("replaced").isTrue()
     }
 
     @Test
@@ -224,7 +216,7 @@ class SqliteTest {
 
         val replaced = sqlite.upsert(selections, rowToInsert)
 
-        assertThat(replaced).isTrue()
+        expectThat(replaced).describedAs("replaced").isTrue()
     }
 
     @Test
@@ -242,7 +234,7 @@ class SqliteTest {
     fun `delete with no deleted rows`() {
         val deletedCount = sqlite.delete(emptyList())
 
-        assertThat(deletedCount).isZero()
+        expectThat(deletedCount).describedAs("deleted count").isEqualTo(0)
     }
 
     @Test
@@ -251,14 +243,14 @@ class SqliteTest {
 
         val deletedCount = sqlite.delete(emptyList())
 
-        assertThat(deletedCount).isEqualTo(2)
+        expectThat(deletedCount).describedAs("deleted count").isEqualTo(2)
     }
 
     @Test
     fun `deleteDatabase success`() {
-        val result = sqlite.deleteDatabase()
+        val deleted = sqlite.deleteDatabase()
 
-        assertThat(result).isTrue()
+        expectThat(deleted).describedAs("deleted").isTrue()
         verify(mockDeleteDatabase).invoke(File(databasePath))
     }
 
@@ -266,9 +258,9 @@ class SqliteTest {
     fun `deleteDatabase failure`() {
         whenever(mockDeleteDatabase.invoke(any())) doReturn false
 
-        val result = sqlite.deleteDatabase()
+        val deleted = sqlite.deleteDatabase()
 
-        assertThat(result).isFalse()
+        expectThat(deleted).describedAs("deleted").isFalse()
         verify(mockDeleteDatabase).invoke(File(databasePath))
     }
 }

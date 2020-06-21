@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import org.junit.Test
+import strikt.api.expectThrows
 
 class ContentValuesUtilsTest {
 
@@ -37,10 +38,10 @@ class ContentValuesUtilsTest {
         verifyNoMoreInteractions(contentValues)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun `toContentValues with unsupported type`() {
         val map = mapOf("foo" to emptyList<String>())
 
-        map.toContentValues { mock() }
+        expectThrows<IllegalArgumentException> { map.toContentValues { mock() } }
     }
 }

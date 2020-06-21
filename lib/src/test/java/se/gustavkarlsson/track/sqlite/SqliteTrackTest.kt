@@ -1,12 +1,6 @@
 package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
-import assertk.assertThat
-import assertk.assertions.containsExactly
-import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
-import assertk.assertions.isNull
-import assertk.assertions.isTrue
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -17,6 +11,12 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Test
 import se.gustavkarlsson.track.Record
+import strikt.api.expectThat
+import strikt.assertions.containsExactly
+import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isNull
+import strikt.assertions.isTrue
 
 private typealias Selector<T> = Cursor.() -> T
 private typealias ReadOptionalRecord = Cursor.() -> Record?
@@ -50,18 +50,18 @@ class SqliteTrackTest {
     fun `get no record`() {
         mockQuery(mockReadOptionalRecord, null)
 
-        val result = sqliteTrack.get(key)
+        val record = sqliteTrack.get(key)
 
-        assertThat(result).isNull()
+        expectThat(record).describedAs("record").isNull()
     }
 
     @Test
     fun `get existing record`() {
         mockQuery(mockReadOptionalRecord, record)
 
-        val result = sqliteTrack.get(key)
+        val record = sqliteTrack.get(key)
 
-        assertThat(result).isEqualTo(record)
+        expectThat(record).describedAs("record").isEqualTo(this.record)
     }
 
     @Test
@@ -75,7 +75,7 @@ class SqliteTrackTest {
             Selection(Table.COLUMN_KEY, Operator.Equals, key),
             Selection(Table.COLUMN_SINGLETON, Operator.Equals, true)
         )
-        assertThat(capturedSelections).isEqualTo(expected)
+        expectThat(capturedSelections).describedAs("selections").isEqualTo(expected)
     }
 
     @Test
@@ -102,7 +102,7 @@ class SqliteTrackTest {
 
         val replaced = sqliteTrack.set(key)
 
-        assertThat(replaced).isTrue()
+        expectThat(replaced).describedAs("replaced").isTrue()
     }
 
     @Test
@@ -111,16 +111,16 @@ class SqliteTrackTest {
 
         val replaced = sqliteTrack.set(key)
 
-        assertThat(replaced).isFalse()
+        expectThat(replaced).describedAs("replaced").isFalse()
     }
 
     @Test
     fun `query to list returns correct value`() {
         mockQuery(mockToRecordSequence, sequenceOf(record))
 
-        val result = sqliteTrack.query(key)
+        val results = sqliteTrack.query(key)
 
-        assertThat(result).containsExactly(record)
+        expectThat(results).describedAs("results").containsExactly(record)
     }
 
     @Test(expected = IllegalStateException::class)
@@ -136,7 +136,7 @@ class SqliteTrackTest {
 
         val result = sqliteTrack.query(key) { it.count() }
 
-        assertThat(result).isEqualTo(2)
+        expectThat(result).describedAs("result").isEqualTo(2)
     }
 
     @Test
@@ -159,7 +159,7 @@ class SqliteTrackTest {
 
         val removed = sqliteTrack.remove(5)
 
-        assertThat(removed).isTrue()
+        expectThat(removed).describedAs("removed").isTrue()
         val expectedSelections = listOf(Selection(Table.COLUMN_ID, Operator.Equals, 5L))
         verify(mockSqlite).delete(expectedSelections)
     }
@@ -170,7 +170,7 @@ class SqliteTrackTest {
 
         val removed = sqliteTrack.remove(key)
 
-        assertThat(removed).isEqualTo(5)
+        expectThat(removed).describedAs("removed").isEqualTo(5)
         val expectedSelections = listOf(Selection(Table.COLUMN_KEY, Operator.Equals, key))
         verify(mockSqlite).delete(expectedSelections)
     }
@@ -185,9 +185,9 @@ class SqliteTrackTest {
         mockQuery(mockToRecordSequence, querySequence)
         whenever(mockSqlite.delete(any())) doReturn 2
 
-        val removed = sqliteTrack.remove { it.id > 5 }
+        val removedCount = sqliteTrack.remove { it.id > 5 }
 
-        assertThat(removed).isEqualTo(2)
+        expectThat(removedCount).describedAs("removed count").isEqualTo(2)
         val expectedSelections = listOf(Selection(Table.COLUMN_ID, Operator.In, listOf(7L, 6L)))
         verify(mockSqlite).delete(expectedSelections)
     }
@@ -196,9 +196,9 @@ class SqliteTrackTest {
     fun clear() {
         whenever(mockSqlite.deleteDatabase()) doReturn true
 
-        val success = sqliteTrack.clear()
+        val cleared = sqliteTrack.clear()
 
-        assertThat(success).isTrue()
+        expectThat(cleared).describedAs("cleared").isTrue()
         verify(mockSqlite).deleteDatabase()
     }
 
