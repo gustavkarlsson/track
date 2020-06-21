@@ -22,4 +22,7 @@ object Versions {
 
     // Instrumentation Test
     val androidTest = "1.2.0"
+
+    // Lint
+    val lint = "27.0.0"
 }
