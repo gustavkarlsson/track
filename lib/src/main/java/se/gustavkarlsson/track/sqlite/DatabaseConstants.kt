@@ -2,10 +2,7 @@ package se.gustavkarlsson.track.sqlite
 
 import android.provider.BaseColumns
 
-internal object Database {
-    const val NAME = "track.db"
-    const val VERSION = 1
-}
+internal const val DATABASE_VERSION = 1
 
 internal object RecordTableV1 {
     const val NAME = "record"

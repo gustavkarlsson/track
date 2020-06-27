@@ -2,6 +2,7 @@ package se.gustavkarlsson.track
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import se.gustavkarlsson.track.sqlite.Sqlite
 import se.gustavkarlsson.track.sqlite.SqliteTrack
 
@@ -56,6 +57,8 @@ interface Track {
 
     /**
      * Clears all records and closes any underlying resources. Returns `true` if successful, otherwise `false`.
+     *
+     * You do **NOT** need to call [initialize] again to use Track after clearing.
      */
     fun clear(): Boolean
 
@@ -63,17 +66,22 @@ interface Track {
      * The default instance of [Track]. Must be initialized with [initialize] before use.
      */
     companion object : Track {
-        private var initializedDelegate: Track? = null
-        private inline val delegate: Track
-            get() = requireNotNull(initializedDelegate) {
+        @VisibleForTesting
+        internal var initializedDelegate: Track? = null
+        private val delegate: Track
+            get() = checkNotNull(initializedDelegate) {
                 "Track is not yet initialized. Run initialize() first"
             }
 
         /**
-         * Initializes this instance using [context].
+         * Initializes this instance using a [Context]
+         *
+         * In most cases you want to do this in your application's `onCreate()`
          */
-        fun initialize(context: Context) {
-            initializedDelegate = SqliteTrack(Sqlite(context), context.appVersion)
+        fun initialize(context: Context, databaseFileName: String = "track.db") {
+            check(initializedDelegate == null) { "Track is already initialized" }
+            require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
+            initializedDelegate = SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)
         }
 
         override fun get(key: String) = delegate.get(key)

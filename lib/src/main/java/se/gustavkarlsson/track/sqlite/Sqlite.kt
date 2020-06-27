@@ -9,8 +9,8 @@ import java.io.File
 
 internal class Sqlite(
     context: Context,
-    databaseName: String? = Database.NAME,
-    databaseVersion: Int = Database.VERSION,
+    databaseName: String,
+    databaseVersion: Int = DATABASE_VERSION,
     private val table: String = Table.NAME,
     private val createStatements: List<String> =
         listOf(Table.CREATE_STATEMENT),
