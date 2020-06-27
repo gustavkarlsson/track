@@ -1,4 +1,4 @@
-[![Build](https://github.com/gustavkarlsson/track/workflows/Build/badge.svg)](https://github.com/gustavkarlsson/track/actions)
+[![Verify](https://github.com/gustavkarlsson/track/workflows/Verify/badge.svg)](https://github.com/gustavkarlsson/track/actions)
 [![Version](https://jitpack.io/v/gustavkarlsson/track.svg)](https://jitpack.io/#gustavkarlsson/track)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gustavkarlsson/track/blob/master/LICENSE.md)
 
@@ -14,7 +14,7 @@ Initialize in `Application.onCreate`
 Track.initialize(this)
 ```
 
-Track a single event (overwriting any previous value) with `set`
+Track a single value (overwriting the existing one) with `set`
 
 ```kotlin
 Track.set("show_intro", "false")
@@ -24,6 +24,29 @@ Read it back as a record with `get`
 
 ```kotlin
 val record = Track.get("show_intro")
+```
+
+Track multiple events per key with `add`
+
+```kotlin
+Track.add("screen_visited", "settings")
+```
+
+And use `query` to find all records of any given key
+
+```kotlin
+val records = Track.query("screen_visited")
+```
+
+You don't have to read all query results into memory
+
+```kotlin
+val firstFiveAboutScreenVisits = Track.query("screen_visited") { records ->
+    records
+        .filter { it.value.contains("about") }
+        .take(5)
+        .toList() // Consume the sequence before returning
+}
 ```
 
 Records look like this:
@@ -38,32 +61,9 @@ data class Record(
 )
 ```
 
-Track multiple events per key with `add`
+## Use cases
 
-```kotlin
-Track.add("note_added", "buy milk")
-```
-
-And use `query` to find all records of any given key
-
-```kotlin
-val records = Track.query("note_added")
-```
-
-You don't have to read all query results into memory
-
-```kotlin
-val firstFiveRecordsAboutEggs = Track.query("note_added") { records ->
-    records
-        .filter { it.value.contains("eggs") }
-        .take(5)
-        .toList() // Consume the sequence before returning
-}
-```
-
-## Some use cases
-
-Track every app launch and show onboarding screen first time
+Track every app launch and show onboarding screen the first time
 
 ```kotlin
 val isFirstLaunch = Track.query("app_launched") { it.none() }
@@ -73,12 +73,12 @@ if (isFirstLaunch) {
 }
 ```
 
-New terms of service introduced in version 54.
-Show dialog if user hasn't accepted them yet
+New terms of service was introduced in version 54.
+Show a dialog if user hasn't accepted them yet.
 
 ```kotlin
-val acceptedTosVersion = Track.get("accepted_tos")?.appVersion ?: -1
-if (acceptedTosVersion < 54) {
+val lastAcceptedTosVersion = Track.get("accepted_tos")?.appVersion ?: -1
+if (lastAcceptedTosVersion < 54) {
     showTosScreen()
 }
 
@@ -95,21 +95,20 @@ private fun showTosScreen() {
         }
         .show()
 }
-
 ```
 
-Ask user to rate app if certain conditions are met
+Ask user to rate the app under certain conditions
 
 ```kotlin
 val usageCount = Track.query("used_feature_x") { it.count() }
 val thirtyDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30)
 val ratedApp = Track.get("rated_app")
 when {
-    // User still hasn't used the app enough
+    // User still hasn't used the app much
     usageCount < 5 -> return
     // User never saw the rating screen
     ratedApp == null -> showRatingScreen()
-    // User has previously clicked "later" and it's been over 30 days
+    // User previously clicked "later" and it's been over 30 days
     ratedApp.value == "later" && ratedApp.timestamp < thirtyDaysAgo -> showRatingScreen()
 }
 
