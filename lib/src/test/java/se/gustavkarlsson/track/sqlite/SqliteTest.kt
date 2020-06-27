@@ -18,6 +18,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import org.junit.Test
 import strikt.api.expectThat
+import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
@@ -115,9 +116,11 @@ class SqliteTest {
         verifyNoMoreInteractions(mockDb)
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun `upgrade not yet supported`() {
-        sqlite.onUpgrade(mockDb, 0, 1)
+        expectThrows<IllegalStateException> {
+            sqlite.onUpgrade(mockDb, 0, 1)
+        }
     }
 
     @Test

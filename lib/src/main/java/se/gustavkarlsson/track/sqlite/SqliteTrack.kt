@@ -34,11 +34,7 @@ internal class SqliteTrack(
         val selections = listOf(Table.COLUMN_KEY isEqualTo key)
         return sqlite.query(selections) { cursor ->
             val recordSequence = cursor.toRecordSequence()
-            val selected = selector(recordSequence)
-            check(selected !== recordSequence) {
-                "May not return this record sequence directly as it will be closed. Try toList()"
-            }
-            selected
+            selector(recordSequence)
         }
     }
 
