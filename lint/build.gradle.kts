@@ -16,6 +16,5 @@ dependencies {
     compileOnly("com.android.tools.lint:lint-checks:${Versions.lint}")
 
     // Lint testing
-    testImplementation("com.android.tools.lint:lint:${Versions.lint}")
     testImplementation("com.android.tools.lint:lint-tests:${Versions.lint}")
 }
