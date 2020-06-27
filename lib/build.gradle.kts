@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
 
@@ -65,7 +67,7 @@ android {
 
 dependencies {
     implementation(kotlin("stdlib", version = Versions.kotlin))
-    implementation("com.android.support:support-annotations:${Versions.supportAnnotations}")
+    implementation("androidx.annotation:annotation:${Versions.annotations}")
 
     testImplementation("junit:junit:${Versions.junit}")
     testImplementation("io.strikt:strikt-core:${Versions.strikt}")

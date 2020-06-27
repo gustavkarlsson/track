@@ -5,11 +5,12 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.annotation.Size
 import java.io.File
 
 internal class Sqlite(
     context: Context,
-    databaseName: String,
+    @Size(min = 1) databaseName: String,
     databaseVersion: Int = DATABASE_VERSION,
     private val table: String = Table.NAME,
     private val createStatements: List<String> =
