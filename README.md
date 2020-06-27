@@ -8,45 +8,22 @@ Simple on-device event tracking and querying for Android.
 
 ## Usage
 
-Initialize in `Application.onCreate`
+Initialize in `Application.onCreate`.
 
 ```kotlin
 Track.initialize(this)
 ```
 
-Track a single value (overwriting the existing one) with `set`
+Track a single value (overwriting the existing one) with `set`.
 
 ```kotlin
 Track.set("show_intro", "false")
 ```
 
-Read it back as a record with `get`
+Read it back as a record with `get`.
 
 ```kotlin
 val record = Track.get("show_intro")
-```
-
-Track multiple events per key with `add`
-
-```kotlin
-Track.add("screen_visited", "settings")
-```
-
-And use `query` to find all records of any given key
-
-```kotlin
-val records = Track.query("screen_visited")
-```
-
-You don't have to read all query results into memory
-
-```kotlin
-val firstFiveAboutScreenVisits = Track.query("screen_visited") { records ->
-    records
-        .filter { it.value.contains("about") }
-        .take(5)
-        .toList() // Consume the sequence before returning
-}
 ```
 
 Records look like this:
@@ -61,9 +38,32 @@ data class Record(
 )
 ```
 
+Track multiple events per key with `add`.
+
+```kotlin
+Track.add("screen_visited", "settings")
+```
+
+Use `query` to find all records of any given key.
+
+```kotlin
+val allScreenVisits = Track.query("screen_visited")
+```
+
+You don't have to read all query results into memory.
+
+```kotlin
+val firstFiveVisitsToAboutScreen = Track.query("screen_visited") { records ->
+    records
+        .filter { it.value == "about" }
+        .take(5)
+        .toList() // Consume the sequence before returning
+}
+```
+
 ## Use cases
 
-Track every app launch and show onboarding screen the first time
+Track app launches and show onboarding screen only the first time.
 
 ```kotlin
 val isFirstLaunch = Track.query("app_launched") { it.none() }
@@ -97,7 +97,7 @@ private fun showTosScreen() {
 }
 ```
 
-Ask user to rate the app under certain conditions
+Ask user to rate the app under certain conditions.
 
 ```kotlin
 val usageCount = Track.query("used_feature_x") { it.count() }
@@ -137,18 +137,34 @@ private fun showRatingScreen() {
 
 Track is hosted on JitPack. Here's how you include it in your gradle project:
 
-**Step 1.** Add the JitPack repository to your `build.gradle` file:
+**Step 1.** Add the JitPack repository to your `build.gradle` or `build.gradle.kts` file:
 
+Groovy
 ```groovy
 repositories {
     maven { url 'https://jitpack.io' }
 }
 ```
 
+Kotlin
+```kotlin
+repositories {
+    maven { setUrl("https://jitpack.io") }
+}
+```
+
 **Step 2.** Add the dependency:
 
+Groovy
 ```groovy
 dependencies {
     implementation 'com.github.gustavkarlsson:track:<latest_version>'
+}
+```
+
+Kotlin
+```kotlin
+dependencies {
+    implementation("com.github.gustavkarlsson:track:<latest_version>")
 }
 ```
