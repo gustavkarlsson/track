@@ -4,6 +4,7 @@ plugins {
 }
 
 val jar by tasks.getting(Jar::class) {
+    @Suppress("UnstableApiUsage")
     manifest {
         attributes["Lint-Registry-v2"] = "se.gustavkarlsson.track.lint.IssueRegistry"
     }

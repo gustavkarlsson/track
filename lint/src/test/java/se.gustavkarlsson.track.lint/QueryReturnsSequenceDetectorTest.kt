@@ -30,6 +30,7 @@ internal class QueryReturnsSequenceDetectorTest : LintDetectorTest() {
     }
 }
 
+// TODO Somehow replace this with actual source code
 @Language("kotlin")
 private val stubImplementation = kotlin(
     """
