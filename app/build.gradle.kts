@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "se.gustavkarlsson.track.demo"
-        minSdkVersion(Versions.minSdk)
+        minSdkVersion(Versions.minAppSdk)
         targetSdkVersion(Versions.targetSdk)
         versionCode = 1
         versionName = "1.0.0"
@@ -33,4 +33,5 @@ android {
 
 dependencies {
     implementation(project(":lib"))
+    lintChecks(project(":lint"))
 }
