@@ -2,6 +2,7 @@ package se.gustavkarlsson.track
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.Size
 import androidx.annotation.VisibleForTesting
 import se.gustavkarlsson.track.sqlite.Sqlite
 import se.gustavkarlsson.track.sqlite.SqliteTrack
@@ -78,7 +79,7 @@ interface Track {
          *
          * In most cases you want to do this in your application's `onCreate()`
          */
-        fun initialize(context: Context, databaseFileName: String = "track.db") {
+        fun initialize(context: Context, @Size(min = 1) databaseFileName: String = "track.db") {
             check(initializedDelegate == null) { "Track is already initialized" }
             require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
             initializedDelegate = SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)

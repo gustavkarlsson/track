@@ -10,7 +10,7 @@ object Versions {
     val java = JavaVersion.VERSION_1_8
     const val jvmTarget = "1.8"
     const val kotlin = "1.3.72"
-    const val supportAnnotations = "28.0.0"
+    const val annotations = "1.1.0"
     const val androidGradle = "4.0.0"
     const val dokka = "0.10.1"
     const val ktlint = "9.2.1"
