@@ -8,10 +8,10 @@ import java.nio.file.Path
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import se.gustavkarlsson.track.sqlite.Database
 import strikt.api.Assertion
 import strikt.api.expect
 import strikt.api.expectThat
+import strikt.api.expectThrows
 import strikt.assertions.all
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.exists
@@ -30,6 +30,7 @@ class TrackTest {
     private lateinit var context: Context
     private lateinit var databasePath: Path
 
+    private val databaseName = "track_test.db"
     private val key = "key"
     private val value = "value"
     private val otherValue = "new_value"
@@ -37,14 +38,46 @@ class TrackTest {
     @Before
     fun setUp() {
         context = InstrumentationRegistry.getInstrumentation().context
-        databasePath = context.getDatabasePath(Database.NAME).toPath()
+        databasePath = context.getDatabasePath(databaseName).toPath()
         Files.deleteIfExists(databasePath)
-        Track.initialize(context)
+        Track.initialize(context, databaseName)
     }
 
     @After
     fun tearDown() {
         Files.deleteIfExists(databasePath)
+        Track.initializedDelegate = null
+    }
+
+    @Test
+    fun emptyDatabaseFileName() {
+        Track.initializedDelegate = null
+        expectThrows<IllegalArgumentException> {
+            Track.initialize(context, "")
+        }
+    }
+
+    @Test
+    fun blankDatabaseFileName() {
+        Track.initializedDelegate = null
+        expectThrows<IllegalArgumentException> {
+            Track.initialize(context, " \n\t")
+        }
+    }
+
+    @Test
+    fun initializeTwice() {
+        expectThrows<IllegalStateException> {
+            Track.initialize(context, databaseName)
+        }
+    }
+
+    @Test
+    fun accessUninitialized() {
+        Track.initializedDelegate = null
+        expectThrows<IllegalStateException> {
+            Track.get(key)
+        }
     }
 
     @Test
@@ -196,6 +229,15 @@ class TrackTest {
         Track.set(key)
         Track.clear()
         expectThat(databasePath).doesNotExist()
+    }
+
+    @Test
+    fun clearAllowsReuse() {
+        Track.set(key)
+        Track.clear()
+        Track.set(key)
+        val record = Track.get(key)
+        expectThat(record).describedAs("record").isNotNull()
     }
 }
 
