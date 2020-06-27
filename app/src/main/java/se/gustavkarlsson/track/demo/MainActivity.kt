@@ -3,7 +3,12 @@ package se.gustavkarlsson.track.demo
 import android.app.Activity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
+import se.gustavkarlsson.track.Record
 import se.gustavkarlsson.track.Track
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MainActivity : Activity() {
 
@@ -13,8 +18,30 @@ class MainActivity : Activity() {
         if (savedInstanceState == null) {
             Track.add("activity_started")
         }
-        val result = Track.query("activity_started") { it.count() }
-        val text = resources.getQuantityString(R.plurals.activity_started_n_times, result, result)
-        mainTextView.text = text
+        val records = Track.query("activity_started") { it.toList() }
+        mainTextView.text = createText(records)
     }
+}
+
+private fun createText(records: List<Record>) = buildString {
+    append("Activity started ${records.count()} ")
+    if (records.count() == 1) {
+        appendln("time")
+    } else {
+        appendln("times")
+    }
+    appendln()
+    appendRecord("First", records.first())
+    appendln()
+    appendln()
+    appendRecord("Last", records.last())
+}
+
+private fun StringBuilder.appendRecord(indexName: String, record: Record) {
+    val instant = Instant.ofEpochMilli(record.timestamp)
+    val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    val timeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(localDateTime)
+    appendln("$indexName record was:")
+    appendln("At $timeString")
+    append("With app version ${record.appVersion}")
 }
