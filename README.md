@@ -8,19 +8,19 @@ Simple on-device event tracking and querying for Android.
 
 ## Usage
 
-Initialize in `Application.onCreate`.
+Initialize in `Application.onCreate()`.
 
 ```kotlin
 Track.initialize(this)
 ```
 
-Track a single value (overwriting the existing one) with `set`.
+Track a single value (overwriting the existing one) with `set()`.
 
 ```kotlin
 Track.set("show_intro", "false")
 ```
 
-Read it back as a record with `get`.
+Read it back as a record with `get()`.
 
 ```kotlin
 val record = Track.get("show_intro")
@@ -38,13 +38,13 @@ data class Record(
 )
 ```
 
-Track multiple events per key with `add`.
+Track multiple events per key with `add()`.
 
 ```kotlin
 Track.add("screen_visited", "settings")
 ```
 
-Use `query` to find all records of any given key.
+Use `query()` to find all records of any given key.
 
 ```kotlin
 val allScreenVisits = Track.query("screen_visited")
