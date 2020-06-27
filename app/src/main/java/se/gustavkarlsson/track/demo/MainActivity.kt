@@ -2,13 +2,13 @@ package se.gustavkarlsson.track.demo
 
 import android.app.Activity
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_main.*
-import se.gustavkarlsson.track.Record
-import se.gustavkarlsson.track.Track
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.android.synthetic.main.activity_main.*
+import se.gustavkarlsson.track.Record
+import se.gustavkarlsson.track.Track
 
 class MainActivity : Activity() {
 
