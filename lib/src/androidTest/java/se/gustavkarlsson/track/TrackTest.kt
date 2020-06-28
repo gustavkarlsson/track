@@ -6,6 +6,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import java.nio.file.Files
 import java.nio.file.Path
 import org.junit.Test
+import se.gustavkarlsson.track.sqlite.Sqlite
+import se.gustavkarlsson.track.sqlite.SqliteTrack
 import strikt.api.Assertion
 import strikt.api.expect
 import strikt.api.expectThat
@@ -221,16 +223,18 @@ class TrackTest {
     }
 }
 
-private fun test(autoInitialize: Boolean = true, block: TestTrack.() -> Unit) {
-    TestTrack().use { testTrack ->
+private fun test(autoInitialize: Boolean = true, block: TestSingletonTrack.() -> Unit) {
+    TestSingletonTrack().use { testTrack ->
         if (autoInitialize) testTrack.initialize("track_test.db")
         testTrack.block()
     }
 }
 
-private class TestTrack : Track by Track, AutoCloseable {
-    private val context: Context
-        get() = InstrumentationRegistry.getInstrumentation().context
+private fun testCreated(databaseFileName: String, block: TestSqliteTrack.() -> Unit) {
+    TestSqliteTrack(databaseFileName).use(block)
+}
+
+private class TestSingletonTrack : Track by Track, AutoCloseable {
 
     private val databaseNames = mutableSetOf<String>()
 
@@ -248,13 +252,25 @@ private class TestTrack : Track by Track, AutoCloseable {
         Track.initialize(context, databaseFileName)
     }
 
-    fun reset() {
+    override fun close() {
         Track.initializedDelegate = null
         databases.forEach { Files.deleteIfExists(it) }
     }
-
-    override fun close() = reset()
 }
+
+private class TestSqliteTrack(private val databaseFileName: String) :
+    Track by SqliteTrack(Sqlite(context, databaseFileName), 1), AutoCloseable {
+
+    val database: Path?
+        get() = context.getDatabasePath(databaseFileName).toPath()
+
+    override fun close() {
+        database?.let(Files::deleteIfExists)
+    }
+}
+
+private val context: Context
+    get() = InstrumentationRegistry.getInstrumentation().context
 
 private fun <T : Path> Assertion.Builder<T>.doesNotExist(): Assertion.Builder<T> =
     assertThat("does not exist") { !Files.exists(it) }

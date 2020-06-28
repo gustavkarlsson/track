@@ -75,7 +75,7 @@ interface Track {
             }
 
         /**
-         * Initializes this instance using a [Context]
+         * Initializes this instance
          *
          * In most cases you want to do this in your application's `onCreate()`
          */
@@ -83,6 +83,15 @@ interface Track {
             check(initializedDelegate == null) { "Track is already initialized" }
             require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
             initializedDelegate = SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)
+        }
+
+        /**
+         * Creates a new instance
+         */
+        fun create(context: Context, @Size(min = 1) databaseFileName: String): Track {
+            //require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
+            //return SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)
+            return TODO()
         }
 
         override fun get(key: String) = delegate.get(key)
