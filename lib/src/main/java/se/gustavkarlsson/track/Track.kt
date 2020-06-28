@@ -75,33 +75,28 @@ interface Track {
             }
 
         /**
-         * Initializes this instance
+         * Initializes the default instance of [Track]
          *
          * In most cases you want to do this in your application's `onCreate()`
          */
         fun initialize(context: Context, @Size(min = 1) databaseFileName: String = "track.db") {
             check(initializedDelegate == null) { "Track is already initialized" }
-            require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
-            initializedDelegate = SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)
+            initializedDelegate = create(context, databaseFileName)
         }
 
         /**
-         * Creates a new instance
+         * Creates a new instance of [Track] using the given database file name
          */
         fun create(context: Context, @Size(min = 1) databaseFileName: String): Track {
-            //require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
-            //return SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)
-            return TODO()
+            require(databaseFileName.isNotBlank()) { "Database file name may not be blank" }
+            return SqliteTrack(Sqlite(context, databaseFileName), context.appVersion)
         }
 
         override fun get(key: String) = delegate.get(key)
 
         override fun set(key: String, value: String) = delegate.set(key, value)
 
-        override fun <T> query(
-            key: String,
-            selector: (Sequence<Record>) -> T
-        ) = delegate.query(key, selector)
+        override fun <T> query(key: String, selector: (Sequence<Record>) -> T) = delegate.query(key, selector)
 
         override fun add(key: String, value: String) = delegate.add(key, value)
 
