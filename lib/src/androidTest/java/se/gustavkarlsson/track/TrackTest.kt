@@ -236,7 +236,7 @@ class TrackTest {
 
     @Test
     fun differentCreatedDatabasesHoldsDifferent() {
-        testCreated("a.db") { a->
+        testCreated("a.db") { a ->
             testCreated("b.db") { b ->
                 a.set(key, value)
                 b.set(key, otherValue)
