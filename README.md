@@ -4,7 +4,7 @@
 
 # Track
 
-Simple on-device event tracking and querying for Android.
+Simple on-device event tracking for Android.
 
 ## Usage
 
