@@ -3,6 +3,8 @@ package se.gustavkarlsson.track
 import android.content.Context
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
+import java.nio.file.Files
+import java.nio.file.Path
 import org.junit.Test
 import strikt.api.Assertion
 import strikt.api.expect
@@ -20,8 +22,6 @@ import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 import strikt.assertions.map
-import java.nio.file.Files
-import java.nio.file.Path
 
 @MediumTest
 class TrackTest {
