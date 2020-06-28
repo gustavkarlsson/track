@@ -30,38 +30,38 @@ class TrackTest {
     private val otherValue = "new_value"
 
     @Test
-    fun emptyDatabaseFileName() = test(autoInitialize = false) {
+    fun emptyDatabaseFileName() = testSingleton(autoInitialize = false) { track ->
         expectThrows<IllegalArgumentException> {
-            initialize("")
+            track.initialize("")
         }
     }
 
     @Test
-    fun blankDatabaseFileName() = test(autoInitialize = false) {
+    fun blankDatabaseFileName() = testSingleton(autoInitialize = false) { track ->
         expectThrows<IllegalArgumentException> {
-            initialize(" \n\t")
+            track.initialize(" \n\t")
         }
     }
 
     @Test
-    fun initializeTwice() = test(autoInitialize = false) {
+    fun initializeTwice() = testSingleton(autoInitialize = false) { track ->
         expectThrows<IllegalStateException> {
-            initialize("a.db")
-            initialize("b.db")
+            track.initialize("a.db")
+            track.initialize("b.db")
         }
     }
 
     @Test
-    fun accessUninitialized() = test(autoInitialize = false) {
+    fun accessUninitialized() = testSingleton(autoInitialize = false) { track ->
         expectThrows<IllegalStateException> {
-            get(key)
+            track.get(key)
         }
     }
 
     @Test
-    fun setNonexistentKey() = test {
-        val replaced = set(key, value)
-        val record = get(key)
+    fun setNonexistentKey() = testSingleton { track ->
+        val replaced = track.set(key, value)
+        val record = track.get(key)
 
         expect {
             that(replaced).describedAs("replaced").isFalse()
@@ -74,10 +74,10 @@ class TrackTest {
 
     @Test
     fun setExistingKey() {
-        test {
-            set(key, value)
-            val replaced = set(key, otherValue)
-            val record = get(key)
+        testSingleton { track ->
+            track.set(key, value)
+            val replaced = track.set(key, otherValue)
+            val record = track.get(key)
 
             expect {
                 that(replaced).describedAs("replaced").isTrue()
@@ -90,10 +90,10 @@ class TrackTest {
     }
 
     @Test
-    fun setDoesNotOverwriteAdd() = test {
-        add(key, value)
-        val replaced = set(key, otherValue)
-        val count = query(key).count()
+    fun setDoesNotOverwriteAdd() = testSingleton { track ->
+        track.add(key, value)
+        val replaced = track.set(key, otherValue)
+        val count = track.query(key).count()
 
         expect {
             that(replaced).describedAs("replaced").isFalse()
@@ -102,20 +102,20 @@ class TrackTest {
     }
 
     @Test
-    fun getDoesNotReadFromAdd() = test {
-        add(key, value)
-        val record = get(key)
+    fun getDoesNotReadFromAdd() = testSingleton { track ->
+        track.add(key, value)
+        val record = track.get(key)
 
         expectThat(record).describedAs("record").isNull()
     }
 
     @Test
-    fun queryGetsAllValues() = test {
+    fun queryGetsAllValues() = testSingleton { track ->
         val values = ('a'..'z').map(Char::toString).toSet()
-        values.forEach { add(key, it) }
-        set(key, "foobar")
+        values.forEach { track.add(key, it) }
+        track.set(key, "foobar")
 
-        val records = query(key)
+        val records = track.query(key)
 
         expectThat(records).describedAs("records")
             .map(Record::value)
@@ -123,12 +123,12 @@ class TrackTest {
     }
 
     @Test
-    fun removeSetValueById() = test {
-        set(key, "foobar")
+    fun removeSetValueById() = testSingleton { track ->
+        track.set(key, "foobar")
 
-        val record = get(key)
-        val removed = remove(record!!.id)
-        val queriedRecords = query(key)
+        val record = track.get(key)
+        val removed = track.remove(record!!.id)
+        val queriedRecords = track.query(key)
 
         expect {
             that(removed).describedAs("removed").isTrue()
@@ -137,13 +137,13 @@ class TrackTest {
     }
 
     @Test
-    fun removeByKey() = test {
+    fun removeByKey() = testSingleton { track ->
         val values = ('a'..'z').map(Char::toString).toSet()
-        values.forEach { add(key, it) }
-        set(key, "foobar")
+        values.forEach { track.add(key, it) }
+        track.set(key, "foobar")
 
-        val removed = remove(key)
-        val queried = query(key)
+        val removed = track.remove(key)
+        val queried = track.query(key)
 
         expect {
             that(removed).describedAs("removed").isEqualTo(values.count() + 1)
@@ -152,13 +152,13 @@ class TrackTest {
     }
 
     @Test
-    fun removeByFilter() = test {
-        ('a'..'z').forEach { add(key, it.toString()) }
+    fun removeByFilter() = testSingleton { track ->
+        ('a'..'z').forEach { track.add(key, it.toString()) }
 
-        val removed = remove {
+        val removed = track.remove {
             it.id <= 10
         }
-        val queried = query(key)
+        val queried = track.query(key)
 
         expect {
             that(removed).describedAs("removed count").isEqualTo(10)
@@ -168,30 +168,30 @@ class TrackTest {
     }
 
     @Test
-    fun noReusedIds() = test {
-        add(key)
-        add(key)
-        add(key)
-        remove(key)
-        add(key)
+    fun noReusedIds() = testSingleton { track ->
+        track.add(key)
+        track.add(key)
+        track.add(key)
+        track.remove(key)
+        track.add(key)
 
-        val lastId = query(key).last().id
+        val lastId = track.query(key).last().id
 
         expectThat(lastId).describedAs("last ID").isGreaterThan(2L)
     }
 
     @Test
-    fun idsAlwaysIncrementing() = test {
-        add(key, "1")
-        add(key, "2")
-        add(key, "3")
-        remove(2)
-        add(key, "4")
-        remove(1)
-        add(key, "5")
-        add(key, "6")
+    fun idsAlwaysIncrementing() = testSingleton { track ->
+        track.add(key, "1")
+        track.add(key, "2")
+        track.add(key, "3")
+        track.remove(2)
+        track.add(key, "4")
+        track.remove(1)
+        track.add(key, "5")
+        track.add(key, "6")
 
-        val allIdsIncrementing = query(key)
+        val allIdsIncrementing = track.query(key)
             .zipWithNext { prev, curr -> curr.id > prev.id }
             .all { it }
 
@@ -199,38 +199,81 @@ class TrackTest {
     }
 
     @Test
-    fun settingValueCreatesDatabase() = test {
-        set(key)
-        expectThat(databases.first()).exists()
+    fun settingValueCreatesDatabase() = testSingleton { track ->
+        track.set(key)
+        expectThat(track.databases.first()).exists()
     }
 
     @Test
-    fun clearDeletesDatabase() = test {
-        set(key)
-        clear()
-        expectThat(databases.first()).doesNotExist()
+    fun clearDeletesDatabase() = testSingleton { track ->
+        track.set(key)
+        track.clear()
+        expectThat(track.databases.first()).doesNotExist()
     }
 
     @Test
-    fun clearAllowsReuse() = test {
-        set(key)
-        clear()
-        set(key)
-        val record = get(key)
+    fun clearAllowsReuse() = testSingleton { track ->
+        track.set(key)
+        track.clear()
+        track.set(key)
+        val record = track.get(key)
         expectThat(record).describedAs("record").isNotNull()
     }
-}
 
-private fun test(autoInitialize: Boolean = true, block: TestTrack.() -> Unit) {
-    TestTrack().use { testTrack ->
-        if (autoInitialize) testTrack.initialize("track_test.db")
-        testTrack.block()
+    @Test
+    fun createWithEmptyDatabaseName() {
+        expectThrows<IllegalArgumentException> {
+            testCreated("")
+        }
+    }
+
+    @Test
+    fun createWithBlankDatabaseName() {
+        expectThrows<IllegalArgumentException> {
+            testCreated(" \n\t")
+        }
+    }
+
+    @Test
+    fun differentCreatedDatabasesHoldsDifferent() {
+        testCreated("a.db") { a ->
+            testCreated("b.db") { b ->
+                a.set(key, value)
+                b.set(key, otherValue)
+
+                val recordA = a.get(key)
+                val recordB = b.get(key)
+
+                expect {
+                    that(recordA).describedAs("record from database a")
+                        .isNotNull()
+                        .get("value from database a", Record::value)
+                        .isEqualTo(value)
+                    that(recordB).describedAs("record from database b")
+                        .isNotNull()
+                        .get("value from database b", Record::value)
+                        .isEqualTo(otherValue)
+                }
+            }
+        }
     }
 }
 
-private class TestTrack : Track by Track, AutoCloseable {
-    private val context: Context
-        get() = InstrumentationRegistry.getInstrumentation().context
+private fun testSingleton(autoInitialize: Boolean = true, block: (track: TestSingletonTrack) -> Unit = {}) {
+    TestSingletonTrack().use { testTrack ->
+        if (autoInitialize) testTrack.initialize("track_test.db")
+        block(testTrack)
+    }
+}
+
+private fun testCreated(databaseFileName: String, block: (track: TestCreatedTrack) -> Unit = {}) {
+    TestCreatedTrack(databaseFileName).use { testTrack ->
+        testTrack.initialize()
+        block(testTrack)
+    }
+}
+
+private class TestSingletonTrack : Track by Track, AutoCloseable {
 
     private val databaseNames = mutableSetOf<String>()
 
@@ -248,13 +291,45 @@ private class TestTrack : Track by Track, AutoCloseable {
         Track.initialize(context, databaseFileName)
     }
 
-    fun reset() {
+    override fun close() {
         Track.initializedDelegate = null
         databases.forEach { Files.deleteIfExists(it) }
     }
-
-    override fun close() = reset()
 }
+
+private class TestCreatedTrack(private val databaseFileName: String) : Track, AutoCloseable {
+    private lateinit var delegate: Track
+
+    val database: Path?
+        get() = context.getDatabasePath(databaseFileName).toPath()
+
+    fun initialize() {
+        delegate = Track.create(context, databaseFileName)
+    }
+
+    override fun close() {
+        database?.let(Files::deleteIfExists)
+    }
+
+    override fun get(key: String) = delegate.get(key)
+
+    override fun set(key: String, value: String) = delegate.set(key, value)
+
+    override fun <T> query(key: String, selector: (Sequence<Record>) -> T) = delegate.query(key, selector)
+
+    override fun add(key: String, value: String) = delegate.add(key, value)
+
+    override fun remove(id: Long) = delegate.remove(id)
+
+    override fun remove(key: String) = delegate.remove(key)
+
+    override fun remove(filter: (Record) -> Boolean) = delegate.remove(filter)
+
+    override fun clear() = delegate.clear()
+}
+
+private val context: Context
+    get() = InstrumentationRegistry.getInstrumentation().context
 
 private fun <T : Path> Assertion.Builder<T>.doesNotExist(): Assertion.Builder<T> =
     assertThat("does not exist") { !Files.exists(it) }

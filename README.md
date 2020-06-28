@@ -8,10 +8,16 @@ Simple on-device event tracking and querying for Android.
 
 ## Usage
 
-Initialize in `Application.onCreate()`.
+Initialize the built in singleton in `Application.onCreate()`.
 
 ```kotlin
 Track.initialize(this)
+```
+
+Or create a new instance.
+
+```kotlin
+val track = Track.create(context, "my_records.db")
 ```
 
 Track a single value (overwriting the existing one) with `set()`.
