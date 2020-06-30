@@ -155,7 +155,7 @@ repositories {
 Kotlin
 ```kotlin
 repositories {
-    maven { setUrl("https://jitpack.io") }
+    maven(url = "https://jitpack.io")
 }
 ```
 
@@ -174,3 +174,7 @@ dependencies {
     implementation("com.github.gustavkarlsson:track:<latest_version>")
 }
 ```
+
+## Demo app
+
+The project contains a very simple demo app which lets you try it out very quickly. Give it a spin!
