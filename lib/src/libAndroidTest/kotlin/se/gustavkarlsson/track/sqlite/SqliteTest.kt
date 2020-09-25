@@ -106,7 +106,7 @@ class SqliteTest {
     )
 
     @Test
-    fun `create database`() {
+    fun create_database() {
         sqlite.onCreate(mockDb)
 
         inOrder(mockDb) {
@@ -117,14 +117,14 @@ class SqliteTest {
     }
 
     @Test
-    fun `upgrade not yet supported`() {
+    fun upgrade_not_yet_supported() {
         expectThrows<IllegalStateException> {
             sqlite.onUpgrade(mockDb, 0, 1)
         }
     }
 
     @Test
-    fun `query no selection`() {
+    fun query_no_selection() {
         val selections = emptyList<Selection>()
 
         sqlite.query(selections) { }
@@ -143,7 +143,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `query with selection and limit`() {
+    fun query_with_selection_and_limit() {
         sqlite.query(selections, 5) { }
 
         verify(mockDb).query(
@@ -168,7 +168,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `successful upsert calls all the right database functions`() {
+    fun successful_upsert_calls_all_the_right_database_functions() {
         sqlite.upsert(selections, rowToInsert)
 
         verify(mockDb).delete(
@@ -183,7 +183,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `failed upsert still closes transaction and database`() {
+    fun failed_upsert_still_closes_transaction_and_database() {
         whenever(mockDb.delete(any(), any(), anyArray())).thenThrow(RuntimeException())
 
         try {
@@ -198,14 +198,14 @@ class SqliteTest {
     }
 
     @Test
-    fun `upsert with no existing row returns true`() {
+    fun upsert_with_no_existing_row_returns_true() {
         val replaced = sqlite.upsert(selections, rowToInsert)
 
         expectThat(replaced).describedAs("replaced").isFalse()
     }
 
     @Test
-    fun `upsert with 1 existing row returns true`() {
+    fun upsert_with_1_existing_row_returns_true() {
         whenever(mockDb.delete(any(), anyOrNull(), anyArray())) doReturn 1
 
         val replaced = sqlite.upsert(selections, rowToInsert)
@@ -214,7 +214,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `upsert with 2 existing rows returns true`() {
+    fun upsert_with_2_existing_rows_returns_true() {
         whenever(mockDb.delete(any(), anyOrNull(), anyArray())) doReturn 2
 
         val replaced = sqlite.upsert(selections, rowToInsert)
@@ -223,7 +223,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `delete calls database`() {
+    fun delete_calls_database() {
         sqlite.delete(selections)
 
         verify(mockDb).delete(
@@ -234,14 +234,14 @@ class SqliteTest {
     }
 
     @Test
-    fun `delete with no deleted rows`() {
+    fun delete_with_no_deleted_rows() {
         val deletedCount = sqlite.delete(emptyList())
 
         expectThat(deletedCount).describedAs("deleted count").isEqualTo(0)
     }
 
     @Test
-    fun `delete with 2 deleted rows`() {
+    fun delete_with_2_deleted_rows() {
         whenever(mockDb.delete(any(), anyOrNull(), anyArray())) doReturn 2
 
         val deletedCount = sqlite.delete(emptyList())
@@ -250,7 +250,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `deleteDatabase success`() {
+    fun deleteDatabase_success() {
         val deleted = sqlite.deleteDatabase()
 
         expectThat(deleted).describedAs("deleted").isTrue()
@@ -258,7 +258,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `deleteDatabase failure`() {
+    fun deleteDatabase_failure() {
         whenever(mockDeleteDatabase.invoke(any())) doReturn false
 
         val deleted = sqlite.deleteDatabase()
