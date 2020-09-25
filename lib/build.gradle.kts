@@ -13,6 +13,7 @@ plugins {
 
 kotlin {
     android("libAndroid") { // Renamed because of https://youtrack.jetbrains.com/issue/KT-34650
+        publishLibraryVariants("release")
         compilations.all { kotlinOptions.jvmTarget = Versions.jvmTarget }
     }
     sourceSets {
@@ -60,6 +61,8 @@ task<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
 }
 
+group = "com.github.gustavkarlsson"
+version = "0.4.1"
 publishing {
     publications {
         create<MavenPublication>("maven") {
