@@ -9,7 +9,7 @@ import strikt.api.expectThrows
 class ContentValuesUtilsTest {
 
     @Test
-    fun `toContentValues with all supported data types`() {
+    fun toContentValues_with_all_supported_data_types() {
         val map = mapOf(
             "Boolean" to true,
             "ByteArray" to byteArrayOf(1),
@@ -39,7 +39,7 @@ class ContentValuesUtilsTest {
     }
 
     @Test
-    fun `toContentValues with unsupported type`() {
+    fun toContentValues_with_unsupported_type() {
         val map = mapOf("foo" to emptyList<String>())
 
         expectThrows<IllegalArgumentException> { map.toContentValues { mock() } }

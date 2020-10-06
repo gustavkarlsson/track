@@ -8,12 +8,12 @@ import strikt.assertions.isEqualTo
 class SelectionTest {
 
     @Test
-    fun `empty selections`() {
+    fun empty_selections() {
         emptyList<Selection>().assert(null)
     }
 
     @Test
-    fun `equals string`() {
+    fun equals_string() {
         val selections = listOf(
             Selection("column", Operator.Equals, "foo")
         )
@@ -22,7 +22,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `greater than long`() {
+    fun greater_than_long() {
         val selections = listOf(
             Selection("column", Operator.GreaterThan, 2L)
         )
@@ -31,7 +31,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `lesser than float`() {
+    fun lesser_than_float() {
         val selections = listOf(
             Selection("column", Operator.LessThan, 2.toFloat())
         )
@@ -40,7 +40,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `not equals boolean`() {
+    fun not_equals_boolean() {
         val selections = listOf(
             Selection("column", Operator.NotEquals, true)
         )
@@ -49,7 +49,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `in empty`() {
+    fun in_empty() {
         val selections = listOf(
             Selection("column", Operator.In, emptyList<Int>())
         )
@@ -58,7 +58,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `in ints`() {
+    fun in_ints() {
         val selections = listOf(
             Selection("column", Operator.In, listOf(1, 2, 3))
         )
@@ -67,7 +67,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `multiple values`() {
+    fun multiple_values() {
         val selections = listOf(
             Selection("column1", Operator.GreaterThan, 2),
             Selection("column2", Operator.Equals, "foo")
@@ -77,7 +77,7 @@ class SelectionTest {
     }
 
     @Test
-    fun `mixed equals and in`() {
+    fun mixed_equals_and_in() {
         val selections = listOf(
             Selection("column1", Operator.Equals, 2),
             Selection("column2", Operator.In, listOf(2.0, 3.0))

@@ -19,3 +19,6 @@
 
 # Captures
 /captures
+
+# MacOS
+.DS_Store

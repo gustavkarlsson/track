@@ -47,7 +47,7 @@ class SqliteTrackTest {
     )
 
     @Test
-    fun `get no record`() {
+    fun get_no_record() {
         mockQuery(mockReadOptionalRecord, null)
 
         val record = sqliteTrack.get(key)
@@ -56,7 +56,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `get existing record`() {
+    fun get_existing_record() {
         mockQuery(mockReadOptionalRecord, record)
 
         val record = sqliteTrack.get(key)
@@ -65,7 +65,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `get passes correct selections`() {
+    fun get_passes_correct_selections() {
         sqliteTrack.get(key)
 
         val capturedSelections = argumentCaptor<List<Selection>> {
@@ -79,7 +79,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `set passes correct arguments`() {
+    fun set_passes_correct_arguments() {
         sqliteTrack.set(key, "value")
 
         val expectedSelections = listOf(
@@ -97,7 +97,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `set with existing replaced`() {
+    fun set_with_existing_replaced() {
         whenever(mockSqlite.upsert(any(), any())) doReturn true
 
         val replaced = sqliteTrack.set(key)
@@ -106,7 +106,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `set with existing not replaced`() {
+    fun set_with_existing_not_replaced() {
         whenever(mockSqlite.upsert(any(), any())) doReturn false
 
         val replaced = sqliteTrack.set(key)
@@ -115,7 +115,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `query to list returns correct value`() {
+    fun query_to_list_returns_correct_value() {
         mockQuery(mockToRecordSequence, sequenceOf(record))
 
         val results = sqliteTrack.query(key)
@@ -124,7 +124,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `query with selector returns correct value`() {
+    fun query_with_selector_returns_correct_value() {
         mockQuery(mockToRecordSequence, sequenceOf(record, record))
 
         val result = sqliteTrack.query(key) { it.count() }
@@ -147,7 +147,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `remove by id`() {
+    fun remove_by_id() {
         whenever(mockSqlite.delete(any())) doReturn 1
 
         val removed = sqliteTrack.remove(5)
@@ -158,7 +158,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `remove by key`() {
+    fun remove_by_key() {
         whenever(mockSqlite.delete(any())) doReturn 5
 
         val removed = sqliteTrack.remove(key)
@@ -169,7 +169,7 @@ class SqliteTrackTest {
     }
 
     @Test
-    fun `remove by filter`() {
+    fun remove_by_filter() {
         val querySequence = sequenceOf(
             record.copy(id = 1),
             record.copy(id = 7),

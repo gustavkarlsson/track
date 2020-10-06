@@ -29,21 +29,21 @@ class CursorUtilsTest {
     }
 
     @Test
-    fun `toRecordSequence may not be iterated twice`() {
+    fun toRecordSequence_may_not_be_iterated_twice() {
         val sequence = mockCursor.toRecordSequence()
         sequence.count()
         expectThrows<IllegalStateException> { sequence.count() }
     }
 
     @Test
-    fun `toRecordSequence no rows`() {
+    fun toRecordSequence_no_rows() {
         val sequence = mockCursor.toRecordSequence()
 
         expectThat(sequence.toList()).describedAs("sequence").isEmpty()
     }
 
     @Test
-    fun `toRecordSequence one row`() {
+    fun toRecordSequence_one_row() {
         mockCursor.mockRecords(stubRecord1)
 
         val sequence = mockCursor.toRecordSequence()
@@ -52,7 +52,7 @@ class CursorUtilsTest {
     }
 
     @Test
-    fun `toRecordSequence multiple rows`() {
+    fun toRecordSequence_multiple_rows() {
         mockCursor.mockRecords(stubRecord1, stubRecord2)
 
         val sequence = mockCursor.toRecordSequence()
@@ -61,14 +61,14 @@ class CursorUtilsTest {
     }
 
     @Test
-    fun `readOptionalRecord with no rows`() {
+    fun readOptionalRecord_with_no_rows() {
         val record = mockCursor.readOptionalRecord()
 
         expectThat(record).describedAs("record").isNull()
     }
 
     @Test
-    fun `readOptionalRecord with one row`() {
+    fun readOptionalRecord_with_one_row() {
         mockCursor.mockRecords(stubRecord1)
 
         val record = mockCursor.readOptionalRecord()
@@ -77,7 +77,7 @@ class CursorUtilsTest {
     }
 
     @Test
-    fun `readOptionalRecord with two rows`() {
+    fun readOptionalRecord_with_two_rows() {
         mockCursor.mockRecords(stubRecord1, stubRecord2)
 
         val record = mockCursor.readOptionalRecord()
