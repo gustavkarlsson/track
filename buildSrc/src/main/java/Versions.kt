@@ -10,7 +10,7 @@ object Versions {
     const val jvmTarget = "1.8"
     const val kotlin = "1.7.20"
     const val annotations = "1.5.0"
-    const val androidGradle = "7.4.1"
+    const val androidGradle = "7.3.1"
     const val dokka = "0.10.1"
     const val ktlint = "9.2.1"
 
