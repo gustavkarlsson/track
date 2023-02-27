@@ -71,6 +71,8 @@ internal class SqliteTrack(
     }
 
     override suspend fun clear() = sqlite.deleteDatabase()
+
+    override fun disconnect() = sqlite.close()
 }
 
 private infix fun String.isEqualTo(value: Any): Selection =

@@ -238,6 +238,15 @@ class TrackTest {
     }
 
     @Test
+    fun canUseAgainAfterDisconnect() = testSingleton { track ->
+        track.add(key)
+        track.disconnect()
+        track.add(key)
+        val records = track.query(key)
+        expectThat(records).hasSize(2)
+    }
+
+    @Test
     fun differentCreatedDatabasesHoldsDifferent() {
         testCreated("a.db") { a ->
             testCreated("b.db") { b ->
@@ -333,6 +342,8 @@ private class TestCreatedTrack(private val databaseFileName: String) : Track, Au
     override suspend fun remove(filter: (Record) -> Boolean) = delegate.remove(filter)
 
     override suspend fun clear() = delegate.clear()
+
+    override fun disconnect() = delegate.disconnect()
 }
 
 private val context: Context

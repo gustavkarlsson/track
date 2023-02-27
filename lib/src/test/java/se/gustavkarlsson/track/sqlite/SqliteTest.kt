@@ -143,7 +143,6 @@ class SqliteTest {
             null,
             null
         )
-        verify(mockDb).close()
     }
 
     @Test
@@ -160,7 +159,6 @@ class SqliteTest {
             null,
             "5"
         )
-        verify(mockDb).close()
     }
 
     @Test
@@ -168,7 +166,6 @@ class SqliteTest {
         sqlite.insert(rowToInsert)
 
         verify(mockDb).insertOrThrow(tableName, null, mockContentValues)
-        verify(mockDb).close()
     }
 
     @Test
@@ -183,7 +180,6 @@ class SqliteTest {
         verify(mockDb).beginTransaction()
         verify(mockDb).setTransactionSuccessful()
         verify(mockDb).endTransaction()
-        verify(mockDb).close()
     }
 
     @Test
@@ -198,7 +194,6 @@ class SqliteTest {
 
         verify(mockDb, never()).setTransactionSuccessful()
         verify(mockDb).endTransaction()
-        verify(mockDb).close()
     }
 
     @Test
@@ -234,7 +229,6 @@ class SqliteTest {
             tableName, selections.toString(),
             selections.toStringArray()
         )
-        verify(mockDb).close()
     }
 
     @Test

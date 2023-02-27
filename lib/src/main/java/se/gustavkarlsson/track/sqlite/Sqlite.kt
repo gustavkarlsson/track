@@ -37,6 +37,8 @@ internal class Sqlite(
     null,
     databaseVersion
 ) {
+    private val database: SQLiteDatabase get() = getDatabase()
+
     private val mutex = Mutex()
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -50,28 +52,24 @@ internal class Sqlite(
     suspend fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
         mutex.withLock {
             withContext(dispatcher) {
-                getDatabase().use {
-                    val cursor = it.query(
-                        table,
-                        null,
-                        selections.toSelectionSql(),
-                        selections.toSelectionArgSql(),
-                        null,
-                        null,
-                        null,
-                        limit?.let(Int::toString)
-                    )
-                    cursor.use(block)
-                }
+                val cursor = database.query(
+                    table,
+                    null,
+                    selections.toSelectionSql(),
+                    selections.toSelectionArgSql(),
+                    null,
+                    null,
+                    null,
+                    limit?.let(Int::toString)
+                )
+                cursor.use(block)
             }
         }
 
     suspend fun insert(row: Map<String, Any>) {
         mutex.withLock {
             withContext(dispatcher) {
-                getDatabase().use {
-                    it.insertOrThrow(table, null, row.toContentValues())
-                }
+                database.insertOrThrow(table, null, row.toContentValues())
             }
         }
     }
@@ -79,20 +77,18 @@ internal class Sqlite(
     suspend fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
         mutex.withLock {
             withContext(dispatcher) {
-                getDatabase().use {
-                    it.beginTransaction()
-                    try {
-                        val deletedCount = it.delete(
-                            table,
-                            selections.toSelectionSql(),
-                            selections.toSelectionArgSql()
-                        )
-                        it.insertOrThrow(table, null, row.toContentValues())
-                        it.setTransactionSuccessful()
-                        deletedCount > 0
-                    } finally {
-                        it.endTransaction()
-                    }
+                database.beginTransaction()
+                try {
+                    val deletedCount = database.delete(
+                        table,
+                        selections.toSelectionSql(),
+                        selections.toSelectionArgSql()
+                    )
+                    database.insertOrThrow(table, null, row.toContentValues())
+                    database.setTransactionSuccessful()
+                    deletedCount > 0
+                } finally {
+                    database.endTransaction()
                 }
             }
         }
@@ -100,20 +96,18 @@ internal class Sqlite(
     suspend fun delete(selections: List<Selection>): Int =
         mutex.withLock {
             withContext(dispatcher) {
-                getDatabase().use {
-                    it.delete(
-                        table,
-                        selections.toSelectionSql(),
-                        selections.toSelectionArgSql()
-                    )
-                }
+                database.delete(
+                    table,
+                    selections.toSelectionSql(),
+                    selections.toSelectionArgSql()
+                )
             }
         }
 
     suspend fun deleteDatabase(): Boolean {
         val deleted = mutex.withLock {
             withContext(dispatcher) {
-                val file = getDatabase().use { File(it.path) }
+                val file = File(database.path)
                 close()
                 deleteDatabase(file)
             }

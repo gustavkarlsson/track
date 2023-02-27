@@ -65,6 +65,11 @@ interface Track {
     suspend fun clear(): Boolean
 
     /**
+     * Disconnects any open connections to the database, freeing up resources
+     */
+    fun disconnect()
+
+    /**
      * The default instance of [Track]. Must be initialized with [initialize] before use.
      */
     companion object : Track {
@@ -108,6 +113,8 @@ interface Track {
         override suspend fun remove(filter: (Record) -> Boolean) = delegate.remove(filter)
 
         override suspend fun clear() = delegate.clear()
+
+        override fun disconnect() = delegate.disconnect()
     }
 }
 
