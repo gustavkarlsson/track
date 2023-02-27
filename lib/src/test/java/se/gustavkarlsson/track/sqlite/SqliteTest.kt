@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package se.gustavkarlsson.track.sqlite
 
 import android.content.ContentValues
@@ -16,6 +18,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
@@ -93,16 +97,16 @@ class SqliteTest {
     }
 
     private val sqlite = Sqlite(
-        mockContext,
-        databaseName,
-        databaseVersion,
-        tableName,
-        createStatements,
-        mockToSelectionSql,
-        mockToSelectionArgSql,
-        mockToContentValues,
-        mockDeleteDatabase,
-        { mockDb }
+        context = mockContext,
+        databaseName = databaseName,
+        databaseVersion = databaseVersion,
+        table = tableName,
+        createStatements = createStatements,
+        toSelectionSql = mockToSelectionSql,
+        toSelectionArgSql = mockToSelectionArgSql,
+        toContentValues = mockToContentValues,
+        deleteDatabase = mockDeleteDatabase,
+        getDatabase = { mockDb }
     )
 
     @Test
@@ -124,7 +128,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `query no selection`() {
+    fun `query no selection`() = runTest {
         val selections = emptyList<Selection>()
 
         sqlite.query(selections) { }
@@ -139,11 +143,10 @@ class SqliteTest {
             null,
             null
         )
-        verify(mockDb).close()
     }
 
     @Test
-    fun `query with selection and limit`() {
+    fun `query with selection and limit`() = runTest {
         sqlite.query(selections, 5) { }
 
         verify(mockDb).query(
@@ -156,19 +159,17 @@ class SqliteTest {
             null,
             "5"
         )
-        verify(mockDb).close()
     }
 
     @Test
-    fun insert() {
+    fun insert() = runTest {
         sqlite.insert(rowToInsert)
 
         verify(mockDb).insertOrThrow(tableName, null, mockContentValues)
-        verify(mockDb).close()
     }
 
     @Test
-    fun `successful upsert calls all the right database functions`() {
+    fun `successful upsert calls all the right database functions`() = runTest {
         sqlite.upsert(selections, rowToInsert)
 
         verify(mockDb).delete(
@@ -179,11 +180,10 @@ class SqliteTest {
         verify(mockDb).beginTransaction()
         verify(mockDb).setTransactionSuccessful()
         verify(mockDb).endTransaction()
-        verify(mockDb).close()
     }
 
     @Test
-    fun `failed upsert still closes transaction and database`() {
+    fun `failed upsert still closes transaction and database`() = runTest {
         whenever(mockDb.delete(any(), any(), anyArray())).thenThrow(RuntimeException())
 
         try {
@@ -194,18 +194,17 @@ class SqliteTest {
 
         verify(mockDb, never()).setTransactionSuccessful()
         verify(mockDb).endTransaction()
-        verify(mockDb).close()
     }
 
     @Test
-    fun `upsert with no existing row returns true`() {
+    fun `upsert with no existing row returns true`() = runTest {
         val replaced = sqlite.upsert(selections, rowToInsert)
 
         expectThat(replaced).describedAs("replaced").isFalse()
     }
 
     @Test
-    fun `upsert with 1 existing row returns true`() {
+    fun `upsert with 1 existing row returns true`() = runTest {
         whenever(mockDb.delete(any(), anyOrNull(), anyArray())) doReturn 1
 
         val replaced = sqlite.upsert(selections, rowToInsert)
@@ -214,7 +213,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `upsert with 2 existing rows returns true`() {
+    fun `upsert with 2 existing rows returns true`() = runTest {
         whenever(mockDb.delete(any(), anyOrNull(), anyArray())) doReturn 2
 
         val replaced = sqlite.upsert(selections, rowToInsert)
@@ -223,25 +222,24 @@ class SqliteTest {
     }
 
     @Test
-    fun `delete calls database`() {
+    fun `delete calls database`() = runTest {
         sqlite.delete(selections)
 
         verify(mockDb).delete(
             tableName, selections.toString(),
             selections.toStringArray()
         )
-        verify(mockDb).close()
     }
 
     @Test
-    fun `delete with no deleted rows`() {
+    fun `delete with no deleted rows`() = runTest {
         val deletedCount = sqlite.delete(emptyList())
 
         expectThat(deletedCount).describedAs("deleted count").isEqualTo(0)
     }
 
     @Test
-    fun `delete with 2 deleted rows`() {
+    fun `delete with 2 deleted rows`() = runTest {
         whenever(mockDb.delete(any(), anyOrNull(), anyArray())) doReturn 2
 
         val deletedCount = sqlite.delete(emptyList())
@@ -250,7 +248,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `deleteDatabase success`() {
+    fun `deleteDatabase success`() = runTest {
         val deleted = sqlite.deleteDatabase()
 
         expectThat(deleted).describedAs("deleted").isTrue()
@@ -258,7 +256,7 @@ class SqliteTest {
     }
 
     @Test
-    fun `deleteDatabase failure`() {
+    fun `deleteDatabase failure`() = runTest {
         whenever(mockDeleteDatabase.invoke(any())) doReturn false
 
         val deleted = sqlite.deleteDatabase()

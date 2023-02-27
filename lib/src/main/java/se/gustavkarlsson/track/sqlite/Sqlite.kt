@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.Size
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 internal class Sqlite(
     context: Context,
@@ -31,15 +33,19 @@ internal class Sqlite(
     null,
     databaseVersion
 ) {
-    override fun onCreate(db: SQLiteDatabase) = createStatements.forEach(db::execSQL)
+    private val database: SQLiteDatabase get() = getDatabase()
+
+    override fun onCreate(db: SQLiteDatabase) {
+        createStatements.forEach(db::execSQL)
+    }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         error("DB upgrade not configured from version $oldVersion-$newVersion")
     }
 
-    fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
-        getDatabase().use {
-            val cursor = it.query(
+    suspend fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
+        withContext(Dispatchers.IO) {
+            val cursor = database.query(
                 table,
                 null,
                 selections.toSelectionSql(),
@@ -52,41 +58,44 @@ internal class Sqlite(
             cursor.use(block)
         }
 
-    fun insert(row: Map<String, Any>) {
-        getDatabase().use {
-            it.insertOrThrow(table, null, row.toContentValues())
+    suspend fun insert(row: Map<String, Any>) {
+        withContext(Dispatchers.IO) {
+            database.insertOrThrow(table, null, row.toContentValues())
         }
     }
 
-    fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
-        getDatabase().use {
-            it.beginTransaction()
+    suspend fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
+        withContext(Dispatchers.IO) {
+            database.beginTransaction()
             try {
-                val deletedCount = it.delete(
+                val deletedCount = database.delete(
                     table,
                     selections.toSelectionSql(),
                     selections.toSelectionArgSql()
                 )
-                it.insertOrThrow(table, null, row.toContentValues())
-                it.setTransactionSuccessful()
+                database.insertOrThrow(table, null, row.toContentValues())
+                database.setTransactionSuccessful()
                 deletedCount > 0
             } finally {
-                it.endTransaction()
+                database.endTransaction()
             }
         }
 
-    fun delete(selections: List<Selection>): Int =
-        getDatabase().use {
-            it.delete(
+    suspend fun delete(selections: List<Selection>): Int =
+        withContext(Dispatchers.IO) {
+            database.delete(
                 table,
                 selections.toSelectionSql(),
                 selections.toSelectionArgSql()
             )
         }
 
-    fun deleteDatabase(): Boolean {
-        val file = getDatabase().use { File(it.path) }
-        close()
-        return deleteDatabase(file)
+    suspend fun deleteDatabase(): Boolean {
+        val deleted = withContext(Dispatchers.IO) {
+            val file = File(database.path)
+            close()
+            deleteDatabase(file)
+        }
+        return deleted
     }
 }

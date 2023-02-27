@@ -23,5 +23,8 @@ android {
 
 dependencies {
     implementation(project(":lib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}")
+    implementation("androidx.activity:activity-ktx:${Versions.activityKtx}")
     lintChecks(project(":lint"))
 }
