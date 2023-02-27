@@ -7,10 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.Size
 import java.io.File
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 internal class Sqlite(
@@ -29,8 +26,7 @@ internal class Sqlite(
     private val deleteDatabase: (File) -> Boolean =
         SQLiteDatabase::deleteDatabase,
     private val getDatabase: SQLiteOpenHelper.() -> SQLiteDatabase =
-        SQLiteOpenHelper::getWritableDatabase,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+        SQLiteOpenHelper::getWritableDatabase
 ) : SQLiteOpenHelper(
     context,
     databaseName,
@@ -38,8 +34,6 @@ internal class Sqlite(
     databaseVersion
 ) {
     private val database: SQLiteDatabase get() = getDatabase()
-
-    private val mutex = Mutex()
 
     override fun onCreate(db: SQLiteDatabase) {
         createStatements.forEach(db::execSQL)
@@ -50,67 +44,57 @@ internal class Sqlite(
     }
 
     suspend fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
-        mutex.withLock {
-            withContext(dispatcher) {
-                val cursor = database.query(
-                    table,
-                    null,
-                    selections.toSelectionSql(),
-                    selections.toSelectionArgSql(),
-                    null,
-                    null,
-                    null,
-                    limit?.let(Int::toString)
-                )
-                cursor.use(block)
-            }
+        withContext(Dispatchers.IO) {
+            val cursor = database.query(
+                table,
+                null,
+                selections.toSelectionSql(),
+                selections.toSelectionArgSql(),
+                null,
+                null,
+                null,
+                limit?.let(Int::toString)
+            )
+            cursor.use(block)
         }
 
     suspend fun insert(row: Map<String, Any>) {
-        mutex.withLock {
-            withContext(dispatcher) {
-                database.insertOrThrow(table, null, row.toContentValues())
-            }
+        withContext(Dispatchers.IO) {
+            database.insertOrThrow(table, null, row.toContentValues())
         }
     }
 
     suspend fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
-        mutex.withLock {
-            withContext(dispatcher) {
-                database.beginTransaction()
-                try {
-                    val deletedCount = database.delete(
-                        table,
-                        selections.toSelectionSql(),
-                        selections.toSelectionArgSql()
-                    )
-                    database.insertOrThrow(table, null, row.toContentValues())
-                    database.setTransactionSuccessful()
-                    deletedCount > 0
-                } finally {
-                    database.endTransaction()
-                }
-            }
-        }
-
-    suspend fun delete(selections: List<Selection>): Int =
-        mutex.withLock {
-            withContext(dispatcher) {
-                database.delete(
+        withContext(Dispatchers.IO) {
+            database.beginTransaction()
+            try {
+                val deletedCount = database.delete(
                     table,
                     selections.toSelectionSql(),
                     selections.toSelectionArgSql()
                 )
+                database.insertOrThrow(table, null, row.toContentValues())
+                database.setTransactionSuccessful()
+                deletedCount > 0
+            } finally {
+                database.endTransaction()
             }
         }
 
+    suspend fun delete(selections: List<Selection>): Int =
+        withContext(Dispatchers.IO) {
+            database.delete(
+                table,
+                selections.toSelectionSql(),
+                selections.toSelectionArgSql()
+            )
+        }
+
     suspend fun deleteDatabase(): Boolean {
-        val deleted = mutex.withLock {
-            withContext(dispatcher) {
-                val file = File(database.path)
-                close()
-                deleteDatabase(file)
-            }
+        val deleted = withContext(Dispatchers.IO) {
+            val file = File(database.path)
+            close()
+            deleteDatabase(file)
         }
         return deleted
     }
