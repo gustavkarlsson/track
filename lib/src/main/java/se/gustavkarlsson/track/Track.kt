@@ -1,6 +1,7 @@
 package se.gustavkarlsson.track
 
 import android.content.Context
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.os.Build
 import androidx.annotation.Size
 import androidx.annotation.VisibleForTesting
@@ -112,7 +113,12 @@ interface Track {
 
 private val Context.appVersion: Long
     get() {
-        val packageInfo = packageManager.getPackageInfo(packageName, 0)
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(packageName, PackageInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, 0)
+        }
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo.longVersionCode
         } else {

@@ -12,7 +12,6 @@ import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.all
 import strikt.assertions.containsExactlyInAnyOrder
-import strikt.assertions.exists
 import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
@@ -330,6 +329,9 @@ private class TestCreatedTrack(private val databaseFileName: String) : Track, Au
 
 private val context: Context
     get() = InstrumentationRegistry.getInstrumentation().context
+
+private fun <T : Path> Assertion.Builder<T>.exists(): Assertion.Builder<T> =
+    assertThat("exists") { Files.exists(it) }
 
 private fun <T : Path> Assertion.Builder<T>.doesNotExist(): Assertion.Builder<T> =
     assertThat("does not exist") { !Files.exists(it) }

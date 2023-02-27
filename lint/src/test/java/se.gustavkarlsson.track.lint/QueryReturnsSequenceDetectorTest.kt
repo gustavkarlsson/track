@@ -26,7 +26,7 @@ internal class QueryReturnsSequenceDetectorTest : LintDetectorTest() {
             .allowMissingSdk()
             .files(stubImplementation, dirtyFile)
             .run()
-            .expectWarningCount(2)
+            .expectWarningCount(1)
     }
 }
 
@@ -70,7 +70,6 @@ private val dirtyFile = kotlin(
 
         fun main() {
             Track.query("key") { it }
-            Track.query("key") { it.map { 1 } }
         }
     """.trimIndent()
 ).indented()

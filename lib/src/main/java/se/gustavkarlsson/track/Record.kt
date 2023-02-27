@@ -2,7 +2,7 @@ package se.gustavkarlsson.track
 
 import android.os.Parcelable
 import java.io.Serializable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A record of an event stored in [Track].
