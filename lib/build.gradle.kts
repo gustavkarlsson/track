@@ -6,7 +6,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-android-extensions")
+    id("kotlin-parcelize")
     id("org.jetbrains.dokka") version Versions.dokka
     `maven-publish`
 }
@@ -40,7 +40,8 @@ publishing {
 }
 
 android {
-    compileSdkVersion(Versions.compileSdk)
+    namespace = "se.gustavkarlsson.track"
+    compileSdk = Versions.compileSdk
 
     compileOptions {
         sourceCompatibility = Versions.java
@@ -56,17 +57,13 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion(Versions.minLibSdk)
+        minSdk = Versions.minLibSdk
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    lintOptions {
-        baseline("lint-baseline.xml")
     }
 }
 
 dependencies {
-    implementation(kotlin("stdlib", version = Versions.kotlin))
+    implementation(kotlin("stdlib", Versions.kotlin))
     implementation("androidx.annotation:annotation:${Versions.annotations}")
 
     testImplementation("junit:junit:${Versions.junit}")

@@ -2,7 +2,6 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         google()
     }
@@ -15,7 +14,6 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
         google()
     }
