@@ -1,15 +1,10 @@
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
-buildscript {
-    repositories {
-        mavenCentral()
-        google()
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle:${Versions.androidGradle}")
-        classpath(kotlin("gradle-plugin", version = Versions.kotlin))
-        classpath("org.jlleitschuh.gradle:ktlint-gradle:${Versions.ktlint}")
-    }
+plugins {
+    id("com.android.application") version Versions.androidGradle apply false
+    id("com.android.library") version Versions.androidGradle apply false
+    id("org.jetbrains.kotlin.android") version Versions.kotlin apply false
+    id("org.jlleitschuh.gradle.ktlint") version Versions.ktlint apply false
 }
 
 allprojects {
@@ -25,8 +20,4 @@ subprojects {
     extensions.getByType(typeOf<KtlintExtension>()).apply {
         android.set(true)
     }
-}
-
-plugins {
-    base
 }
