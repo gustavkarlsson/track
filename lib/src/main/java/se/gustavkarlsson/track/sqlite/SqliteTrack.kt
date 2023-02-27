@@ -11,7 +11,7 @@ internal class SqliteTrack(
     private val readOptionalRecord: Cursor.() -> Record? = Cursor::readOptionalRecord,
     private val toRecordSequence: Cursor.() -> Sequence<Record> = Cursor::toRecordSequence
 ) : Track {
-    override fun get(key: String): Record? {
+    override suspend fun get(key: String): Record? {
         val selections = listOf(
             Table.COLUMN_KEY isEqualTo key,
             Table.COLUMN_SINGLETON isEqualTo true
@@ -19,7 +19,7 @@ internal class SqliteTrack(
         return sqlite.query(selections, limit = 1, block = readOptionalRecord)
     }
 
-    override fun set(key: String, value: String): Boolean {
+    override suspend fun set(key: String, value: String): Boolean {
         val selections = listOf(
             Table.COLUMN_KEY isEqualTo key,
             Table.COLUMN_SINGLETON isEqualTo true
@@ -27,7 +27,7 @@ internal class SqliteTrack(
         return sqlite.upsert(selections, createRow(key, value, true))
     }
 
-    override fun <T> query(
+    override suspend fun <T> query(
         key: String,
         selector: (Sequence<Record>) -> T
     ): T {
@@ -38,7 +38,7 @@ internal class SqliteTrack(
         }
     }
 
-    override fun add(key: String, value: String) = sqlite.insert(createRow(key, value, false))
+    override suspend fun add(key: String, value: String) = sqlite.insert(createRow(key, value, false))
 
     private fun createRow(key: String, value: String, singleton: Boolean): Map<String, Any> =
         mapOf(
@@ -49,17 +49,17 @@ internal class SqliteTrack(
             Table.COLUMN_VALUE to value
         )
 
-    override fun remove(id: Long): Boolean {
+    override suspend fun remove(id: Long): Boolean {
         val selections = listOf(Table.COLUMN_ID isEqualTo id)
         return sqlite.delete(selections) > 0
     }
 
-    override fun remove(key: String): Int {
+    override suspend fun remove(key: String): Int {
         val selections = listOf(Table.COLUMN_KEY isEqualTo key)
         return sqlite.delete(selections)
     }
 
-    override fun remove(filter: (Record) -> Boolean): Int {
+    override suspend fun remove(filter: (Record) -> Boolean): Int {
         val ids = sqlite.query(emptyList()) {
             it.toRecordSequence()
                 .filter(filter)
@@ -70,7 +70,7 @@ internal class SqliteTrack(
         return sqlite.delete(selections)
     }
 
-    override fun clear() = sqlite.deleteDatabase()
+    override suspend fun clear() = sqlite.deleteDatabase()
 }
 
 private infix fun String.isEqualTo(value: Any): Selection =

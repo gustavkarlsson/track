@@ -7,6 +7,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.Size
 import java.io.File
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 internal class Sqlite(
     context: Context,
@@ -24,69 +29,95 @@ internal class Sqlite(
     private val deleteDatabase: (File) -> Boolean =
         SQLiteDatabase::deleteDatabase,
     private val getDatabase: SQLiteOpenHelper.() -> SQLiteDatabase =
-        SQLiteOpenHelper::getWritableDatabase
+        SQLiteOpenHelper::getWritableDatabase,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : SQLiteOpenHelper(
     context,
     databaseName,
     null,
     databaseVersion
 ) {
-    override fun onCreate(db: SQLiteDatabase) = createStatements.forEach(db::execSQL)
+    private val mutex = Mutex()
+
+    override fun onCreate(db: SQLiteDatabase) {
+        createStatements.forEach(db::execSQL)
+    }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         error("DB upgrade not configured from version $oldVersion-$newVersion")
     }
 
-    fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
-        getDatabase().use {
-            val cursor = it.query(
-                table,
-                null,
-                selections.toSelectionSql(),
-                selections.toSelectionArgSql(),
-                null,
-                null,
-                null,
-                limit?.let(Int::toString)
-            )
-            cursor.use(block)
-        }
-
-    fun insert(row: Map<String, Any>) {
-        getDatabase().use {
-            it.insertOrThrow(table, null, row.toContentValues())
-        }
-    }
-
-    fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
-        getDatabase().use {
-            it.beginTransaction()
-            try {
-                val deletedCount = it.delete(
-                    table,
-                    selections.toSelectionSql(),
-                    selections.toSelectionArgSql()
-                )
-                it.insertOrThrow(table, null, row.toContentValues())
-                it.setTransactionSuccessful()
-                deletedCount > 0
-            } finally {
-                it.endTransaction()
+    suspend fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
+        mutex.withLock {
+            withContext(dispatcher) {
+                getDatabase().use {
+                    val cursor = it.query(
+                        table,
+                        null,
+                        selections.toSelectionSql(),
+                        selections.toSelectionArgSql(),
+                        null,
+                        null,
+                        null,
+                        limit?.let(Int::toString)
+                    )
+                    cursor.use(block)
+                }
             }
         }
 
-    fun delete(selections: List<Selection>): Int =
-        getDatabase().use {
-            it.delete(
-                table,
-                selections.toSelectionSql(),
-                selections.toSelectionArgSql()
-            )
+    suspend fun insert(row: Map<String, Any>) {
+        mutex.withLock {
+            withContext(dispatcher) {
+                getDatabase().use {
+                    it.insertOrThrow(table, null, row.toContentValues())
+                }
+            }
+        }
+    }
+
+    suspend fun upsert(selections: List<Selection>, row: Map<String, Any>): Boolean =
+        mutex.withLock {
+            withContext(dispatcher) {
+                getDatabase().use {
+                    it.beginTransaction()
+                    try {
+                        val deletedCount = it.delete(
+                            table,
+                            selections.toSelectionSql(),
+                            selections.toSelectionArgSql()
+                        )
+                        it.insertOrThrow(table, null, row.toContentValues())
+                        it.setTransactionSuccessful()
+                        deletedCount > 0
+                    } finally {
+                        it.endTransaction()
+                    }
+                }
+            }
         }
 
-    fun deleteDatabase(): Boolean {
-        val file = getDatabase().use { File(it.path) }
-        close()
-        return deleteDatabase(file)
+    suspend fun delete(selections: List<Selection>): Int =
+        mutex.withLock {
+            withContext(dispatcher) {
+                getDatabase().use {
+                    it.delete(
+                        table,
+                        selections.toSelectionSql(),
+                        selections.toSelectionArgSql()
+                    )
+                }
+            }
+        }
+
+    suspend fun deleteDatabase(): Boolean {
+        val deleted = mutex.withLock {
+            withContext(dispatcher) {
+                val file = getDatabase().use { File(it.path) }
+                close()
+                deleteDatabase(file)
+            }
+        }
+        return deleted
     }
 }

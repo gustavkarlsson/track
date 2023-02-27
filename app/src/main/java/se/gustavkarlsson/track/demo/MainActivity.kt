@@ -1,25 +1,29 @@
 package se.gustavkarlsson.track.demo
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 import se.gustavkarlsson.track.Record
 import se.gustavkarlsson.track.Track
 
-class MainActivity : Activity() {
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (savedInstanceState == null) {
-            Track.add("activity_started")
+        lifecycleScope.launch {
+            if (savedInstanceState == null) {
+                Track.add("activity_started")
+            }
+            val records = Track.query("activity_started") { it.toList() }
+            findViewById<TextView>(R.id.mainTextView).text = createText(records)
         }
-        val records = Track.query("activity_started") { it.toList() }
-        findViewById<TextView>(R.id.mainTextView).text = createText(records)
     }
 }
 

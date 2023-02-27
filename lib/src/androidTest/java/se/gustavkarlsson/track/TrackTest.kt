@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package se.gustavkarlsson.track
 
 import android.content.Context
@@ -5,6 +7,8 @@ import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import strikt.api.Assertion
 import strikt.api.expect
@@ -258,17 +262,21 @@ class TrackTest {
     }
 }
 
-private fun testSingleton(autoInitialize: Boolean = true, block: (track: TestSingletonTrack) -> Unit = {}) {
-    TestSingletonTrack().use { testTrack ->
-        if (autoInitialize) testTrack.initialize("track_test.db")
-        block(testTrack)
+private fun testSingleton(autoInitialize: Boolean = true, block: suspend (track: TestSingletonTrack) -> Unit = {}) {
+    runTest {
+        TestSingletonTrack().use { testTrack ->
+            if (autoInitialize) testTrack.initialize("track_test.db")
+            block(testTrack)
+        }
     }
 }
 
-private fun testCreated(databaseFileName: String, block: (track: TestCreatedTrack) -> Unit = {}) {
-    TestCreatedTrack(databaseFileName).use { testTrack ->
-        testTrack.initialize()
-        block(testTrack)
+private fun testCreated(databaseFileName: String, block: suspend (track: TestCreatedTrack) -> Unit = {}) {
+    runTest {
+        TestCreatedTrack(databaseFileName).use { testTrack ->
+            testTrack.initialize()
+            block(testTrack)
+        }
     }
 }
 
@@ -310,21 +318,21 @@ private class TestCreatedTrack(private val databaseFileName: String) : Track, Au
         database?.let(Files::deleteIfExists)
     }
 
-    override fun get(key: String) = delegate.get(key)
+    override suspend fun get(key: String) = delegate.get(key)
 
-    override fun set(key: String, value: String) = delegate.set(key, value)
+    override suspend fun set(key: String, value: String) = delegate.set(key, value)
 
-    override fun <T> query(key: String, selector: (Sequence<Record>) -> T) = delegate.query(key, selector)
+    override suspend fun <T> query(key: String, selector: (Sequence<Record>) -> T) = delegate.query(key, selector)
 
-    override fun add(key: String, value: String) = delegate.add(key, value)
+    override suspend fun add(key: String, value: String) = delegate.add(key, value)
 
-    override fun remove(id: Long) = delegate.remove(id)
+    override suspend fun remove(id: Long) = delegate.remove(id)
 
-    override fun remove(key: String) = delegate.remove(key)
+    override suspend fun remove(key: String) = delegate.remove(key)
 
-    override fun remove(filter: (Record) -> Boolean) = delegate.remove(filter)
+    override suspend fun remove(filter: (Record) -> Boolean) = delegate.remove(filter)
 
-    override fun clear() = delegate.clear()
+    override suspend fun clear() = delegate.clear()
 }
 
 private val context: Context

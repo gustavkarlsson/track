@@ -9,8 +9,10 @@ object Versions {
     val java = JavaVersion.VERSION_1_8
     const val jvmTarget = "1.8"
     const val kotlin = "1.7.20"
+    const val coroutines = "1.6.4"
     const val annotations = "1.5.0"
     const val androidGradle = "7.3.1"
+    const val activityKtx = "1.6.1"
     const val dokka = "0.10.1"
     const val ktlint = "9.2.1"
 
