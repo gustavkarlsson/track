@@ -27,7 +27,10 @@ internal class QueryReturnsSequenceDetector : Detector(), SourceCodeScanner {
         if (method.parameters.size != 2) return
         if ((method.parameters[0] as? PsiParameter)?.type?.canonicalText != "java.lang.String") return
         if ((method.parameters[1] as? PsiParameter)?.type?.canonicalText
-                ?.startsWith("kotlin.jvm.functions.Function") == false) return
+            ?.startsWith("kotlin.jvm.functions.Function") == false
+        ) {
+            return
+        }
         if (method.typeParameters.size != 1) return
         if (node.returnType?.canonicalText?.startsWith("kotlin.sequences") == false) return
         reportIssue(context, node)
@@ -54,7 +57,7 @@ internal class QueryReturnsSequenceDetector : Detector(), SourceCodeScanner {
                             The sequence of records must be exhausted within the lambda.
                             Returning a sequence is therefore a sign of a potential bug.
                             Tip: Consume the sequence by turning it into collection with toList() or similar.
-                        """.trimIndent(),
+            """.trimIndent(),
             category = Category.CORRECTNESS,
             priority = 4,
             severity = Severity.WARNING,

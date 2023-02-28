@@ -172,10 +172,7 @@ class SqliteTest {
     fun `successful upsert calls all the right database functions`() = runTest {
         sqlite.upsert(selections, rowToInsert)
 
-        verify(mockDb).delete(
-            tableName, selections.toString(),
-            selections.toStringArray()
-        )
+        verify(mockDb).delete(tableName, selections.toString(), selections.toStringArray())
         verify(mockDb).insertOrThrow(tableName, null, mockContentValues)
         verify(mockDb).beginTransaction()
         verify(mockDb).setTransactionSuccessful()
@@ -225,10 +222,7 @@ class SqliteTest {
     fun `delete calls database`() = runTest {
         sqlite.delete(selections)
 
-        verify(mockDb).delete(
-            tableName, selections.toString(),
-            selections.toStringArray()
-        )
+        verify(mockDb).delete(tableName, selections.toString(), selections.toStringArray())
     }
 
     @Test
