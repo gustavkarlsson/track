@@ -1,42 +1,10 @@
 @file:Suppress("UnstableApiUsage")
 
-import org.gradle.jvm.tasks.Jar
-import org.jetbrains.dokka.gradle.DokkaTask
-
 plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-parcelize")
-    id("org.jetbrains.dokka") version Versions.dokka
     `maven-publish`
-}
-
-task<DokkaTask>("dokkaJavadoc") {
-    outputFormat = "javadoc"
-    outputDirectory = "$buildDir/javadoc"
-}
-
-task<Jar>("javadocJar") {
-    from((tasks["dokkaJavadoc"] as DokkaTask).outputDirectory)
-    archiveClassifier.set("javadoc")
-}
-
-task<Jar>("sourcesJar") {
-    from(android.sourceSets["main"].java.srcDirs)
-    archiveClassifier.set("sources")
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            artifactId = "track"
-            artifact(tasks["javadocJar"])
-            artifact(tasks["sourcesJar"])
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
-                builtBy(tasks["assemble"])
-            }
-        }
-    }
 }
 
 android {
@@ -58,7 +26,28 @@ android {
 
     defaultConfig {
         minSdk = Versions.minLibSdk
+        aarMetadata {
+            minCompileSdk = Versions.compileSdk
+        }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "track"
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
     }
 }
 
