@@ -61,7 +61,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
     implementation("androidx.annotation:annotation:${Versions.annotations}")
 
-    implementation(project(":lint"))
     lintPublish(project(":lint"))
 
     testImplementation("junit:junit:${Versions.junit}")
