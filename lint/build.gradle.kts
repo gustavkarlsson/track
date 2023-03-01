@@ -1,12 +1,7 @@
 plugins {
     id("kotlin")
     `java-library`
-}
-
-val jar by tasks.getting(Jar::class) {
-    manifest {
-        attributes["Lint-Registry-v2"] = "se.gustavkarlsson.track.lint.IssueRegistry"
-    }
+    id("com.android.lint")
 }
 
 dependencies {
@@ -16,5 +11,7 @@ dependencies {
     compileOnly("com.android.tools.lint:lint-checks:${Versions.lint}")
 
     // Lint testing
+    testImplementation("junit:junit:${Versions.junit}")
+    testImplementation("com.android.tools.lint:lint:${Versions.lint}")
     testImplementation("com.android.tools.lint:lint-tests:${Versions.lint}")
 }

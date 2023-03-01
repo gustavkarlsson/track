@@ -25,5 +25,14 @@ object Versions {
     const val androidTest = "1.5.2"
 
     // Lint
-    const val lint = "27.2.2"
+    val lint = androidGradle.add23ToMajorVersion()
+}
+
+// Needed to get the correct version of lint
+// https://googlesamples.github.io/android-custom-lint-rules/api-guide.html#example:samplelintcheckgithubproject/lintversion?
+private fun String.add23ToMajorVersion(): String {
+    val majorVersion = takeWhile { it != '.' }.toInt()
+    val rest = dropWhile { it != '.' }
+    val lintMajorVersion = majorVersion + 23
+    return "$lintMajorVersion$rest"
 }

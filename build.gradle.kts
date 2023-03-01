@@ -3,6 +3,7 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 plugins {
     id("com.android.application") version Versions.androidGradle apply false
     id("com.android.library") version Versions.androidGradle apply false
+    id("com.android.lint") version Versions.androidGradle apply false
     id("org.jetbrains.kotlin.android") version Versions.kotlin apply false
     id("org.jlleitschuh.gradle.ktlint") version Versions.ktlint apply false
 }

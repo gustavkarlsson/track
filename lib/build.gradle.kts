@@ -32,6 +32,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    lint {
+        @Suppress("UnstableApiUsage")
+        checkDependencies = true
+    }
+
     publishing {
         singleVariant("release") {
             withSourcesJar()
@@ -55,6 +60,9 @@ dependencies {
     implementation(kotlin("stdlib", Versions.kotlin))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
     implementation("androidx.annotation:annotation:${Versions.annotations}")
+
+    implementation(project(":lint"))
+    lintPublish(project(":lint"))
 
     testImplementation("junit:junit:${Versions.junit}")
     testImplementation("io.strikt:strikt-core:${Versions.strikt}")
