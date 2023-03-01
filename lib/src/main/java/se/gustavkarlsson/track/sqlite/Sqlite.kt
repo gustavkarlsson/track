@@ -55,7 +55,7 @@ internal class Sqlite(
                 null,
                 limit?.let(Int::toString)
             )
-            cursor.use(block)
+            cursor.use(block).also { cursor.close() }
         }
 
     suspend fun insert(row: Map<String, Any>) {

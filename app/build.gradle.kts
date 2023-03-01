@@ -19,6 +19,10 @@ android {
         versionCode = 1
         versionName = "1.0.0"
     }
+    lint {
+        @Suppress("UnstableApiUsage")
+        checkDependencies = true
+    }
 }
 
 dependencies {
@@ -26,5 +30,4 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}")
     implementation("androidx.activity:activity-ktx:${Versions.activityKtx}")
-    lintChecks(project(":lint"))
 }

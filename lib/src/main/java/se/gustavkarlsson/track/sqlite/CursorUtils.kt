@@ -10,10 +10,11 @@ internal fun Cursor.toRecordSequence(): Sequence<Record> =
     }.constrainOnce()
 
 internal fun Cursor.readOptionalRecord(): Record? =
-    if (moveToNext())
+    if (moveToNext()) {
         readExistingRecord()
-    else
+    } else {
         null
+    }
 
 private fun Cursor.readExistingRecord(): Record = Record(
     id = this[Table.COLUMN_ID],
