@@ -1,6 +1,7 @@
 package se.gustavkarlsson.track.sqlite
 
 import android.database.Cursor
+import se.gustavkarlsson.track.Order
 import se.gustavkarlsson.track.Record
 import se.gustavkarlsson.track.Track
 
@@ -27,12 +28,9 @@ internal class SqliteTrack(
         return sqlite.upsert(selections, createRow(key, value, true))
     }
 
-    override suspend fun <T> query(
-        key: String,
-        selector: (Sequence<Record>) -> T
-    ): T {
+    override suspend fun <T> query(key: String, order: Order, selector: (Sequence<Record>) -> T): T {
         val selections = listOf(Table.COLUMN_KEY isEqualTo key)
-        return sqlite.query(selections) { cursor ->
+        return sqlite.query(selections, order) { cursor ->
             val recordSequence = cursor.toRecordSequence()
             selector(recordSequence)
         }

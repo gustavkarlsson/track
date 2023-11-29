@@ -21,6 +21,7 @@ import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import se.gustavkarlsson.track.Order
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
@@ -147,7 +148,7 @@ class SqliteTest {
 
     @Test
     fun `query with selection and limit`() = runTest {
-        sqlite.query(selections, 5) { }
+        sqlite.query(selections, Order.TimestampAscending, 5) { }
 
         verify(mockDb).query(
             tableName,
@@ -156,7 +157,7 @@ class SqliteTest {
             selections.toStringArray(),
             null,
             null,
-            null,
+            Order.TimestampAscending.toOrderBySql(),
             "5"
         )
     }

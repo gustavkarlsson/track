@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package se.gustavkarlsson.track.sqlite
 
@@ -15,6 +15,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import se.gustavkarlsson.track.Order
 import se.gustavkarlsson.track.Record
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -74,7 +75,7 @@ class SqliteTrackTest {
         sqliteTrack.get(key)
 
         val capturedSelections = argumentCaptor<List<Selection>> {
-            verify(mockSqlite).query(capture(), any(), any())
+            verify(mockSqlite).query(capture(), anyOrNull(), any(), any())
         }.firstValue
         val expected = listOf(
             Selection(Table.COLUMN_KEY, Operator.Equals, key),
@@ -132,7 +133,7 @@ class SqliteTrackTest {
     fun `query with selector returns correct value`() = runTest {
         mockQuery(mockToRecordSequence, sequenceOf(record, record))
 
-        val result = sqliteTrack.query(key) { it.count() }
+        val result = sqliteTrack.query(key, Order.InsertionAscending) { it.count() }
 
         expectThat(result).describedAs("result").isEqualTo(2)
     }
@@ -205,8 +206,8 @@ class SqliteTrackTest {
         val mockCursor = mock<Cursor>()
         whenever(block.invoke(mockCursor)) doReturn returnValue
         mockSqlite.stub {
-            onBlocking { mockSqlite.query(any(), anyOrNull(), any<Selector<T>>()) } doAnswer {
-                val function = it.arguments[2] as Selector<T>
+            onBlocking { mockSqlite.query(any(), anyOrNull(), anyOrNull(), any<Selector<T>>()) } doAnswer {
+                val function = it.arguments[3] as Selector<T>
                 function(mockCursor)
             }
         }
