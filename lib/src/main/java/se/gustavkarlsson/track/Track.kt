@@ -27,15 +27,19 @@ interface Track {
     /**
      * Gets all records for [key].
      */
-    suspend fun query(key: String): List<Record> = query(key) { it.toList() }
+    suspend fun query(key: String): List<Record> = query(key, Order.InsertionAscending) { it.toList() }
 
     /**
      * Creates a sequence of all records for [key] and invokes [selector] on the resulting sequence,
-     * yielding a return value.
+     * yielding a return value. The elements of the sequence will be ordered by [order]
      *
      * The sequence may only be iterated once, and may not be used after this function returns.
      */
-    suspend fun <T> query(key: String, selector: (Sequence<Record>) -> T): T
+    suspend fun <T> query(
+        key: String,
+        order: Order = Order.InsertionAscending,
+        selector: (Sequence<Record>) -> T
+    ): T
 
     /**
      * Adds a [value] for [key]
@@ -102,7 +106,9 @@ interface Track {
 
         override suspend fun set(key: String, value: String) = delegate.set(key, value)
 
-        override suspend fun <T> query(key: String, selector: (Sequence<Record>) -> T) = delegate.query(key, selector)
+        override suspend fun <T> query(key: String, order: Order, selector: (Sequence<Record>) -> T): T {
+            return delegate.query(key, order, selector)
+        }
 
         override suspend fun add(key: String, value: String) = delegate.add(key, value)
 

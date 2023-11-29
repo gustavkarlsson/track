@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
+import se.gustavkarlsson.track.Order
 import se.gustavkarlsson.track.Record
 import se.gustavkarlsson.track.Track
 
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
             if (savedInstanceState == null) {
                 Track.add("activity_started")
             }
-            val records = Track.query("activity_started") { it.toList() }
+            val records = Track.query("activity_started", Order.InsertionAscending) { it.toList() }
             findViewById<TextView>(R.id.mainTextView).text = createText(records)
         }
     }

@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import strikt.api.Assertion
@@ -15,6 +16,7 @@ import strikt.api.expect
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.all
+import strikt.assertions.containsExactly
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
@@ -123,6 +125,60 @@ class TrackTest {
         expectThat(records).describedAs("records")
             .map(Record::value)
             .containsExactlyInAnyOrder(values + "foobar")
+    }
+
+    @Test
+    fun queryWithInsertionAscendingSorting() = testSingleton { track ->
+        val values = ('a'..'z').map(Char::toString).toSet()
+        values.forEach { track.add(key, it) }
+
+        val records = track.query(key, Order.InsertionAscending) { it.toList() }
+
+        expectThat(records).describedAs("records")
+            .map(Record::value)
+            .containsExactly(values)
+    }
+
+    @Test
+    fun queryWithInsertionDescendingSorting() = testSingleton { track ->
+        val values = ('a'..'z').map(Char::toString).toSet()
+        values.forEach { track.add(key, it) }
+
+        val records = track.query(key, Order.InsertionDescending) { it.toList() }
+
+        expectThat(records).describedAs("records")
+            .map(Record::value)
+            .containsExactly(values.reversed())
+    }
+
+    @Test
+    fun queryWithTimestampAscendingSorting() = testSingleton { track ->
+        val values = ('a'..'z').map(Char::toString).toSet()
+        values.forEach {
+            delay(1)
+            track.add(key, it)
+        }
+
+        val records = track.query(key, Order.TimestampAscending) { it.toList() }
+
+        expectThat(records).describedAs("records")
+            .map(Record::value)
+            .containsExactly(values)
+    }
+
+    @Test
+    fun queryWithTimestampDescendingSorting() = testSingleton { track ->
+        val values = ('a'..'z').map(Char::toString).toSet()
+        values.forEach {
+            delay(1)
+            track.add(key, it)
+        }
+
+        val records = track.query(key, Order.TimestampDescending) { it.toList() }
+
+        expectThat(records).describedAs("records")
+            .map(Record::value)
+            .containsExactly(values.reversed())
     }
 
     @Test
@@ -331,7 +387,9 @@ private class TestCreatedTrack(private val databaseFileName: String) : Track, Au
 
     override suspend fun set(key: String, value: String) = delegate.set(key, value)
 
-    override suspend fun <T> query(key: String, selector: (Sequence<Record>) -> T) = delegate.query(key, selector)
+    override suspend fun <T> query(key: String, order: Order, selector: (Sequence<Record>) -> T): T {
+        return delegate.query(key, order, selector)
+    }
 
     override suspend fun add(key: String, value: String) = delegate.add(key, value)
 

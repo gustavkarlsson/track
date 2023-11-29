@@ -9,6 +9,7 @@ import androidx.annotation.Size
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import se.gustavkarlsson.track.Order
 
 internal class Sqlite(
     context: Context,
@@ -21,6 +22,8 @@ internal class Sqlite(
         List<Selection>::toSelectionSql,
     private val toSelectionArgSql: List<Selection>.() -> Array<String> =
         List<Selection>::toSelectionArgSql,
+    private val toOrderBySql: Order.() -> String =
+        Order::toOrderBySql,
     private val toContentValues: Map<String, Any?>.() -> ContentValues =
         Map<String, Any?>::toContentValues,
     private val deleteDatabase: (File) -> Boolean =
@@ -43,7 +46,12 @@ internal class Sqlite(
         error("DB upgrade not configured from version $oldVersion-$newVersion")
     }
 
-    suspend fun <T> query(selections: List<Selection>, limit: Int? = null, block: (Cursor) -> T): T =
+    suspend fun <T> query(
+        selections: List<Selection>,
+        order: Order? = null,
+        limit: Int? = null,
+        block: (Cursor) -> T
+    ): T =
         withContext(Dispatchers.IO) {
             val cursor = database.query(
                 table,
@@ -52,7 +60,7 @@ internal class Sqlite(
                 selections.toSelectionArgSql(),
                 null,
                 null,
-                null,
+                order?.toOrderBySql(),
                 limit?.let(Int::toString)
             )
             cursor.use(block).also { cursor.close() }
